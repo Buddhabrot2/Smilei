@@ -49,6 +49,9 @@ struct ExtTimeField {
     Profile *profile;
     
     Field *savedField;
+	
+	//buddhabrot: this is for saving the profile, needs to be generated once! can i use apply field for this?
+	Field *prescribedField;
     
     unsigned int index;
 };
@@ -392,6 +395,11 @@ public:
 
 	//! Method use to reset the real value of all fields on which we imposed an external time field
 	virtual void resetPrescribedFields();
+	
+	//! buddhabrot: Method use to apply the field from a previosly saved field. this avoids reevaluation from python
+	virtual void rememberPrescribedFields();
+	
+	virtual void generatePrescribedFields(Patch *patch, double time);
 
     void saveExternalFields( Patch * );
     

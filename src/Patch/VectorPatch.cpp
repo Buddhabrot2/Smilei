@@ -3510,6 +3510,22 @@ void VectorPatch::applyPrescribedFields(double time)
     }
 }
 
+//buddhabrot
+void VectorPatch::generatePrescribedFields(double time)
+{
+    for( unsigned int ipatch=0 ; ipatch<size() ; ipatch++ ) {
+        patches_[ipatch]->EMfields->generatePrescribedFields( ( *this )( ipatch ), time );
+    }
+}
+
+// buddhabrot: i made this to circumvent the evaluation of a python function on each timestep
+void VectorPatch::rememberPrescribedFields()
+{
+    for( unsigned int ipatch=0 ; ipatch<size() ; ipatch++ ) {
+        patches_[ipatch]->EMfields->rememberPrescribedFields( );
+    }
+}
+
 //! Method use to reset the real value of all fields on which we imposed an external time field
 void VectorPatch::resetPrescribedFields()
 {

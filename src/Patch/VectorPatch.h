@@ -199,6 +199,7 @@ public :
     void solveRelativisticPoissonAM( Params &params, SmileiMPI *smpi, double time_primal );
     
     //! For all patch initialize the externals (lasers, fields, antennas)
+	//buddhabrot: are exttimefields build here?
     void initExternals( Params &params );
     
     //! For all patches, apply the antenna current
@@ -215,6 +216,10 @@ public :
     
     //! For each patch, apply external time fields
     void applyPrescribedFields(double time);
+	
+	// buddhabrot: i made this to circumvent the evaluation of a python function on each timestep
+	void rememberPrescribedFields();
+	void generatePrescribedFields(double time);
 
 	//! reset all external time fields;
     void resetPrescribedFields();

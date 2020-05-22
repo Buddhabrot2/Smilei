@@ -168,9 +168,11 @@ int main( int argc, char *argv[] )
         vecPatches.applyExternalFields();
         vecPatches.saveExternalFields( params );
 
-        TITLE( "Applying prescribed fields at time t = 0" );
+        TITLE( "Applying prescribed fields at time t = 0" ); //maybe t=0 is the problem? but the saved field seems to have a good value
         vecPatches.applyPrescribedFields(time_prim);        
+		vecPatches.generatePrescribedFields(time_prim);        
 
+	
         // Solve "Relativistic Poisson" problem (including proper centering of fields)
         // Note: the mean gamma for initialization will be computed for all the species
         // whose fields are initialized at this iteration
@@ -323,7 +325,7 @@ int main( int argc, char *argv[] )
             //if ( global_factor==1 )
             {
                 // de-apply external time fields if requested
-                if ( vecPatches(0)->EMfields->extTimeFields.size() )
+                if (vecPatches(0)->EMfields->extTimeFields.size() )
                     vecPatches.resetPrescribedFields();
 
                 if( time_dual > params.time_fields_frozen ) {
@@ -333,8 +335,9 @@ int main( int argc, char *argv[] )
                 #pragma omp single
                 {
                     // apply external time fields if requested
-                    if ( vecPatches(0)->EMfields->extTimeFields.size() )
-                        vecPatches.applyPrescribedFields(time_prim);
+                    if (vecPatches(0)->EMfields->extTimeFields.size() )
+                        //vecPatches.applyPrescribedFields(time_prim);
+					    vecPatches.rememberPrescribedFields(); //remembering instead of reevaluating
                 }
 
             }

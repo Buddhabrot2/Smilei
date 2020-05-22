@@ -1324,10 +1324,12 @@ void ElectroMagn2D::applyExternalField( Field *my_field,  Profile *profile, Patc
     
 }
 
+//implement a generate method, where the profile is applied to an empty field?
 void ElectroMagn2D::applyPrescribedField( Field *my_field,  Profile *profile, Patch *patch, double time )
+//buddhabrot: heres where the magic happens
 {
 
-    Field2D *field2D=static_cast<Field2D *>( my_field );
+    Field2D *field2D=static_cast<Field2D *>( my_field ); //cast pointer to 2d version of the field, since my_field is a pointer to a generic field
     
     vector<double> pos( 2, 0 );
     pos[0]      = dx*( ( double )( patch->getCellStartingGlobalIndex( 0 ) )+( field2D->isDual( 0 )?-0.5:0. ) );
@@ -1339,13 +1341,14 @@ void ElectroMagn2D::applyPrescribedField( Field *my_field,  Profile *profile, Pa
     for( int i=0 ; i<N0 ; i++ ) {
         pos[1] = pos1;
         for( int j=0 ; j<N1 ; j++ ) {
-            ( *field2D )( i, j ) += profile->valueAt( pos, time );
+            ( *field2D )( i, j ) += profile->valueAt( pos, time ); // the value of the profile is ADDED to the field, the python function is evalued in valueAt, this is the bottleneck
             pos[1] += dy;
         }
         pos[0] += dx;
     }
     
 }
+
 
 
 void ElectroMagn2D::initAntennas( Patch *patch )

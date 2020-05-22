@@ -225,9 +225,21 @@ public:
     {
         DEBUGEXEC( if( globalDims_!=from_field->globalDims_ ) ERROR( "Field size do not match "<< name << " " << from_field->name ) );
         for( unsigned int i=0; i< globalDims_; i++ ) {
-            ( *this )( i )=( *from_field )( i );
+            ( *this )( i )=( *from_field )( i ); //what exactly does this do? copies all members?
         }
     }
+	
+	//buddhabrot: add any fields value to this field
+	inline void addFrom( Field *from_field )
+    {
+        DEBUGEXEC( if( globalDims_!=from_field->globalDims_ ) ERROR( "Field size do not match "<< name << " " << from_field->name ) );
+        for( unsigned int i=0; i< globalDims_; i++ ) {
+            ( *this )( i )+=( *from_field )( i ); //what exactly does this do? copies all members? -> no, the () operator is defined above
+			//debug message here
+			//MESSAGE(( *from_field )( i )<<'\t'); //reasonable values, so the generation probably works
+        }
+    }
+	
     
     virtual void put( Field *outField, Params &params, SmileiMPI *smpi, Patch *thisPatch, Patch  *outPatch ) = 0;
     virtual void get( Field  *inField, Params &params, SmileiMPI *smpi, Patch   *inPatch, Patch *thisPatch ) = 0;

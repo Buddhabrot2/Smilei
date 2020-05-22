@@ -125,16 +125,19 @@ public:
             for( unsigned int ifield=0; ifield<EMfields->allFields.size(); ifield++ ) {
                 if( EMfields->allFields[ifield]
                         && fieldName==EMfields->allFields[ifield]->name ) {
-                	
+                	// buddhabrot: here i can generate the prescirbedField member of the ExtTimeField struct! done
                 	if (params.nDim_field == 1) {
                 		extField.savedField = new Field1D(EMfields->allFields[ifield]->dims());
+						extField.prescribedField = new Field1D(EMfields->allFields[ifield]->dims()); //buddhabrot
                 	} else if (params.nDim_field == 2){
                 		extField.savedField = new Field2D(EMfields->allFields[ifield]->dims());
+						extField.prescribedField = new Field2D(EMfields->allFields[ifield]->dims()); //buddhabrot
                 	} else if (params.nDim_field == 3){
                 		extField.savedField = new Field3D(EMfields->allFields[ifield]->dims());
+						extField.prescribedField = new Field2D(EMfields->allFields[ifield]->dims()); //buddhabrot
                 	}
-                    extField.savedField->copyFrom(EMfields->allFields[ifield]);
-                    extField.savedField->name = EMfields->allFields[ifield]->name;
+                    extField.savedField->copyFrom(EMfields->allFields[ifield]); // initialize with correct values
+                    extField.savedField->name = EMfields->allFields[ifield]->name; // buddhabrot: why is the name relevant?
                     extField.index =  ifield;
                     break;
                 }
@@ -287,6 +290,7 @@ public:
         for( unsigned int n_extfield = 0; n_extfield < EMfields->extTimeFields.size(); n_extfield++ ) {
             ExtTimeField extField;
             extField.savedField   = EMfields->extTimeFields[n_extfield].savedField;
+			extField.prescribedField   = EMfields->extTimeFields[n_extfield].prescribedField; //buddhabrot
             extField.profile = EMfields->extTimeFields[n_extfield].profile;
             extField.index   = EMfields->extTimeFields[n_extfield].index;
             newEMfields->extTimeFields.push_back( extField );
