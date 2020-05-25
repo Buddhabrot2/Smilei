@@ -484,10 +484,9 @@ void ElectroMagn::applyPrescribedFields( Patch *patch, double time )
 {
     for( vector<ExtTimeField>::iterator extfield=extTimeFields.begin(); extfield!=extTimeFields.end(); extfield++ ) {//for all extTimeFields
         if( extfield->index < allFields.size() ) {
-            extfield->savedField->copyFrom(allFields[extfield->index]);  //copyFrom is a inline member of Field (found in Field.h) that copys the field of its argument in each dim
-			//each extfield saves the value, which the regular field had before applying the extfield
-            applyPrescribedField( allFields[extfield->index], extfield->profile, patch, time ); //virtual function, maybe impemented for all dimensions separately?
-        }
+            extfield->savedField->copyFrom(allFields[extfield->index]);  
+            applyPrescribedField( allFields[extfield->index], extfield->profile, patch, time ); //virtual function, maybe impemented for all dimensions separately? yes. the value of data is changed
+		}
     }
 }
 
@@ -499,7 +498,9 @@ void ElectroMagn::generatePrescribedFields( Patch *patch, double time )
 			//each extfield saves the value, which the regular field had before applying the extfield
 			//i assume here that a new field is initilialized empty, is that correct? yes, see constructor in Field2D.cpp
 			// i actually should set it to 0 here, to have a consistent result if called multiple times
-            applyPrescribedField( extfield->prescribedField, extfield->profile, patch, time ); //evaluate the profile and save it to the changed exttimefield struct
+			extfield->prescribedField->clear();
+            //applyPrescribedField( extfield->prescribedField, extfield->profile, patch, time ); //evaluate the profile and save it to the changed exttimefield struct
+			applyPrescribedField( extfield->prescribedField, extfield->profile, patch, time ); 
         }
     }
 }
@@ -507,13 +508,12 @@ void ElectroMagn::generatePrescribedFields( Patch *patch, double time )
 
 //buddhabrot: to avoid python function calls during loop
 //works like apply, but uses the copyFrom function
-void ElectroMagn::rememberPrescribedFields() //must be virtual! probably implemented in the 1D,2D,3D versions
-//correct, and there is the end of the rabbithole
+void ElectroMagn::rememberPrescribedFields() 
 {
     for( vector<ExtTimeField>::iterator extfield=extTimeFields.begin(); extfield!=extTimeFields.end(); extfield++ ) {
         if( extfield->index < allFields.size() ) {
             extfield->savedField->copyFrom(allFields[extfield->index]);
-            allFields[extfield->index]->addFrom(extfield->prescribedField); // new add method for fields
+            allFields[extfield->index]->addFrom(extfield->prescribedField); // new add method for fields DEBUG!!!!!!
         }
     }
 }

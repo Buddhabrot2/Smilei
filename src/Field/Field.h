@@ -225,7 +225,13 @@ public:
     {
         DEBUGEXEC( if( globalDims_!=from_field->globalDims_ ) ERROR( "Field size do not match "<< name << " " << from_field->name ) );
         for( unsigned int i=0; i< globalDims_; i++ ) {
-            ( *this )( i )=( *from_field )( i ); //what exactly does this do? copies all members?
+            ( *this )( i )=( *from_field )( i ); //what exactly does this do? copies all members? // does this () operator really enable changing the value of data? 
+			//usually it would return the value, not the pointer
+			//maybe this does not change the value, only the pointer
+			// this <- pointer to current field object
+			// *this <- current field object
+			//(*this)(i) returns either double or pointer to double, depending on constness
+			//asumming neither is const, the pointer is changed to the pointer to the data of fromField, in which case addfrom cant work
         }
     }
 	
@@ -234,12 +240,22 @@ public:
     {
         DEBUGEXEC( if( globalDims_!=from_field->globalDims_ ) ERROR( "Field size do not match "<< name << " " << from_field->name ) );
         for( unsigned int i=0; i< globalDims_; i++ ) {
-            ( *this )( i )+=( *from_field )( i ); //what exactly does this do? copies all members? -> no, the () operator is defined above
-			//debug message here
-			//MESSAGE(( *from_field )( i )<<'\t'); //reasonable values, so the generation probably works
-        }
+			//MESSAGE("ADDFROM");
+			//MESSAGE(( *this )( i )<<"    ");
+			//MESSAGE(( *from_field )( i )<<"    ");
+			( *this )( i )+=( *from_field )( i );
+			//MESSAGE(( *this )( i )<<"    ");
+			//MESSAGE("    ");
+		}
     }
 	
+	inline void clear()
+    {
+        DEBUGEXEC( if( globalDims_!=from_field->globalDims_ ) ERROR( "Field size do not match "<< name << " " << from_field->name ) );
+        for( unsigned int i=0; i< globalDims_; i++ ) {
+            ( *this )( i )=0.0; 
+        }
+    }
     
     virtual void put( Field *outField, Params &params, SmileiMPI *smpi, Patch *thisPatch, Patch  *outPatch ) = 0;
     virtual void get( Field  *inField, Params &params, SmileiMPI *smpi, Patch   *inPatch, Patch *thisPatch ) = 0;

@@ -138,6 +138,9 @@ public:
                 	}
                     extField.savedField->copyFrom(EMfields->allFields[ifield]); // initialize with correct values
                     extField.savedField->name = EMfields->allFields[ifield]->name; // buddhabrot: why is the name relevant?
+					extField.prescribedField->clear(); // initialize with correct values
+					extField.prescribedField->name = EMfields->allFields[ifield]->name; // buddhabrot: why is the name relevant?
+
                     extField.index =  ifield;
                     break;
                 }
@@ -289,10 +292,27 @@ public:
         // -----------------
         for( unsigned int n_extfield = 0; n_extfield < EMfields->extTimeFields.size(); n_extfield++ ) {
             ExtTimeField extField;
-            extField.savedField   = EMfields->extTimeFields[n_extfield].savedField;
-			extField.prescribedField   = EMfields->extTimeFields[n_extfield].prescribedField; //buddhabrot
+            //extField.savedField   = EMfields->extTimeFields[n_extfield].savedField;
+			//extField.prescribedField   = EMfields->extTimeFields[n_extfield].prescribedField; //buddhabrot : hier wird der pointer kopiert! ich muss aber die prescirbed neu erzeugen
             extField.profile = EMfields->extTimeFields[n_extfield].profile;
             extField.index   = EMfields->extTimeFields[n_extfield].index;
+            // buddhabrot: here i can generate the prescirbedField member of the ExtTimeField struct! done
+            if (params.nDim_field == 1) {
+				extField.savedField = new Field1D(EMfields->allFields[EMfields->extTimeFields[n_extfield].index]->dims());
+				extField.prescribedField = new Field1D(EMfields->allFields[EMfields->extTimeFields[n_extfield].index]->dims()); //buddhabrot
+            } else if (params.nDim_field == 2){
+                extField.savedField = new Field2D(EMfields->allFields[EMfields->extTimeFields[n_extfield].index]->dims());
+				extField.prescribedField = new Field2D(EMfields->allFields[EMfields->extTimeFields[n_extfield].index]->dims()); //buddhabrot
+            } else if (params.nDim_field == 3){
+                extField.savedField = new Field3D(EMfields->allFields[EMfields->extTimeFields[n_extfield].index]->dims());
+				extField.prescribedField = new Field2D(EMfields->allFields[EMfields->extTimeFields[n_extfield].index]->dims()); //buddhabrot
+            }
+            //extField.savedField->copyFrom(EMfields->allFields[ifield]); // initialize with correct values
+            extField.savedField->name = EMfields->extTimeFields[n_extfield].savedField->name; 
+			extField.prescribedField->name = EMfields->extTimeFields[n_extfield].prescribedField->name; 
+
+			extField.index = EMfields->extTimeFields[n_extfield].index;
+             //extField.index =  ifield;
             newEMfields->extTimeFields.push_back( extField );
         }
         

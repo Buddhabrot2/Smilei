@@ -1342,9 +1342,11 @@ void ElectroMagn2D::applyPrescribedField( Field *my_field,  Profile *profile, Pa
         pos[1] = pos1;
         for( int j=0 ; j<N1 ; j++ ) {
             ( *field2D )( i, j ) += profile->valueAt( pos, time ); // the value of the profile is ADDED to the field, the python function is evalued in valueAt, this is the bottleneck
+			//MESSAGE(pos[0]<<"    "<<pos[1]<<"    "<< ( *field2D )( i, j ))
             pos[1] += dy;
         }
         pos[0] += dx;
+		
     }
     
 }

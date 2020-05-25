@@ -168,10 +168,10 @@ int main( int argc, char *argv[] )
         vecPatches.applyExternalFields();
         vecPatches.saveExternalFields( params );
 
-        TITLE( "Applying prescribed fields at time t = 0" ); //maybe t=0 is the problem? but the saved field seems to have a good value
+        TITLE( "Applying prescribed fields at time t = 0" ); //maybe t=0 is the problem? but the saved field seems to have a good value... does it? can i use diagnostics?
         vecPatches.applyPrescribedFields(time_prim);        
 		vecPatches.generatePrescribedFields(time_prim);        
-
+		//could check for differences here
 	
         // Solve "Relativistic Poisson" problem (including proper centering of fields)
         // Note: the mean gamma for initialization will be computed for all the species
@@ -325,6 +325,7 @@ int main( int argc, char *argv[] )
             //if ( global_factor==1 )
             {
                 // de-apply external time fields if requested
+
                 if (vecPatches(0)->EMfields->extTimeFields.size() )
                     vecPatches.resetPrescribedFields();
 
