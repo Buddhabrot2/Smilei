@@ -63,7 +63,7 @@ void RadiationTables::initialization( Params &params , SmileiMPI *smpi )
     if( params.hasLLRadiation || params.hasDiagRadiationSpectrum ) {
         MESSAGE( 1,"A continuous radiation reaction module"
                  << " is requested by some species:" );
-        PyTools::extract( "minimum_chi_continuous", minimum_chi_continuous_, "RadiationReaction", 0, "a float" );
+        PyTools::extract( "minimum_chi_continuous", minimum_chi_continuous_, "RadiationReaction"  );
         MESSAGE( 2,"applied minimum chi for continuous radiation module is "
                 <<std::setprecision(6)<<minimum_chi_continuous_<<".\n");
     }
@@ -71,7 +71,7 @@ void RadiationTables::initialization( Params &params , SmileiMPI *smpi )
     if( params.hasNielRadiation ) {
         MESSAGE( 1,"The Fokker-Planck radiation reaction module 'Niel'"
                  << " is requested by some species:" );
-        PyTools::extract( "minimum_chi_continuous", minimum_chi_continuous_, "RadiationReaction", 0, "a float" );
+        PyTools::extract( "minimum_chi_continuous", minimum_chi_continuous_, "RadiationReaction"  );
         MESSAGE( 2,"applied minimum chi for Niel's radiation module is "
                 <<std::setprecision(6)<<minimum_chi_continuous_<<".\n");
     }
@@ -79,7 +79,7 @@ void RadiationTables::initialization( Params &params , SmileiMPI *smpi )
     if( params.hasMCRadiation ) {
         MESSAGE( 1,"The Monte-Carlo Compton radiation module"
                  << " is requested by some species:" );
-        PyTools::extract( "minimum_chi_discontinuous", minimum_chi_discontinuous_, "RadiationReaction", 0, "a float" );
+        PyTools::extract( "minimum_chi_discontinuous", minimum_chi_discontinuous_, "RadiationReaction"  );
         MESSAGE( 2,"applied minimum chi for MC radiation module is "
                  <<std::setprecision(6)<<minimum_chi_discontinuous_<<".\n");
 
@@ -91,7 +91,7 @@ void RadiationTables::initialization( Params &params , SmileiMPI *smpi )
 
         if( params.hasNielRadiation ) {
             // How to handle the h function (table or fit)
-            PyTools::extract( "Niel_computation_method", niel_.computation_method_, "RadiationReaction", 0, "a string" );
+            PyTools::extract( "Niel_computation_method", niel_.computation_method_, "RadiationReaction" );
         }
 
         // If Monte-Carlo radiation loss is requested
@@ -99,18 +99,18 @@ void RadiationTables::initialization( Params &params , SmileiMPI *smpi )
 
             // Discontinuous minimum threshold
             PyTools::extract( "minimum_chi_discontinuous",
-                              minimum_chi_discontinuous_, "RadiationReaction", 0, "a float" );
+                              minimum_chi_discontinuous_, "RadiationReaction" );
         }
 
         // With any radiation model whatever the table computation
         if( params.hasNielRadiation || params.hasMCRadiation ) {
 
             // Path to the databases
-            PyTools::extract( "table_path", table_path_, "RadiationReaction", 0, "a string" );
+            PyTools::extract( "table_path", table_path_, "RadiationReaction"  );
 
             // Radiation threshold on the quantum parameter particle_chi
             PyTools::extract( "minimum_chi_continuous",
-                              minimum_chi_continuous_, "RadiationReaction", 0, "a float" );
+                              minimum_chi_continuous_, "RadiationReaction" );
 
         }
     }
@@ -321,7 +321,7 @@ void RadiationTables::initialization( Params &params , SmileiMPI *smpi )
 //
 //! \param particle_chi particle quantum parameter
 // -----------------------------------------------------------------------------
-double RadiationTables::computeRandomPhotonChiWithInterpolation( double particle_chi)
+double RadiationTables::computeRandomPhotonChiWithInterpolation( double particle_chi, Random * rand)
 {
     // Log10 of particle_chi
     double log10_particle_chi;
@@ -334,7 +334,7 @@ double RadiationTables::computeRandomPhotonChiWithInterpolation( double particle
     // Random xi
     double xi;
     
-    double chiph_xip_delta;
+    //double chiph_xip_delta;
     double chiph_xip_delta_1;
     double chiph_xip_delta_2;
 
@@ -371,7 +371,7 @@ double RadiationTables::computeRandomPhotonChiWithInterpolation( double particle
     // Search of the index ichiph for photon_chi
     // ---------------------------------------
 
-    xi = Rand::uniform();
+    xi = rand->uniform();
 
     // If the randomly computed xi if below the first one of the row,
     // we take the first one which corresponds to the minimal photon photon_chi
@@ -545,26 +545,28 @@ double RadiationTables::getHNielFromTable( double particle_chi )
 //! \param gamma particle Lorentz factor
 //! \param particle_chi particle quantum parameter
 // -----------------------------------------------------------------------------
-double RadiationTables::getNielStochasticTerm( double gamma,
-        double particle_chi,
-        double sqrtdt )
-{
-    // Get the value of h for the corresponding particle_chi
-    double h, r;
-
-    h = RadiationTables::getHNielFromTable( particle_chi );
-
-    // Pick a random number in the normal distribution of standard
-    // deviation sqrt(dt) (variance dt)
-    r = Rand::normal( sqrtdt );
-
-    /*std::random_device device;
-    std::mt19937 gen(device());
-    std::normal_distribution<double> normal_distribution(0., sqrt(dt));
-    r = normal_distribution(gen);*/
-
-    return sqrt( factor_classical_radiated_power_*gamma*h )*r;
-}
+// double RadiationTables::getNielStochasticTerm( double gamma,
+//         double particle_chi,
+//         double sqrtdt,
+//         Random * rand)
+// {
+//     // Get the value of h for the corresponding particle_chi
+//     double h, r;
+//
+//     h = RadiationTables::getHNielFromTable( particle_chi );
+//
+//     // Pick a random number in the normal distribution of standard
+//     // deviation sqrt(dt) (variance dt)
+//     // r = Rand::normal( sqrtdt );
+//     r = rand->normal() * sqrtdt;
+//
+//     /*std::random_device device;
+//     std::mt19937 gen(device());
+//     std::normal_distribution<double> normal_distribution(0., sqrt(dt));
+//     r = normal_distribution(gen);*/
+//
+//     return sqrt( factor_classical_radiated_power_*gamma*h )*r;
+// }
 
 // -----------------------------------------------------------------------------
 // TABLE READING

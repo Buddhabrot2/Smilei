@@ -52,17 +52,17 @@ Checkpoint::Checkpoint( Params &params, SmileiMPI *smpi ) :
 
     if( PyTools::nComponents( "Checkpoints" ) > 0 ) {
     
-        PyTools::extract( "dump_step", dump_step, "Checkpoints", 0, "an integer" );
-        if( dump_step ) {
+        PyTools::extract( "dump_step", dump_step, "Checkpoints"  );
+        if( dump_step > 0 ) {
             MESSAGE( 1, "Code will dump after " << dump_step << " steps" );
         }
         
-        PyTools::extract( "dump_minutes", dump_minutes, "Checkpoints", 0, "a float" );
-        if( dump_minutes>0 ) {
+        PyTools::extract( "dump_minutes", dump_minutes, "Checkpoints"  );
+        if( dump_minutes > 0 ) {
             MESSAGE( 1, "Code will stop after " << dump_minutes << " minutes" );
         }
         
-        PyTools::extract( "keep_n_dumps", keep_n_dumps, "Checkpoints", 0, "an integer" );
+        PyTools::extract( "keep_n_dumps", keep_n_dumps, "Checkpoints"  );
         if( keep_n_dumps<1 ) {
             keep_n_dumps=1;
         }
@@ -72,11 +72,11 @@ Checkpoint::Checkpoint( Params &params, SmileiMPI *smpi ) :
             keep_n_dumps = keep_n_dumps_max;
         }
         
-        PyTools::extract( "exit_after_dump", exit_after_dump, "Checkpoints", 0, "True or False");
+        PyTools::extract( "exit_after_dump", exit_after_dump, "Checkpoints"  );
         
-        PyTools::extract( "dump_deflate", dump_deflate, "Checkpoints", 0, "an integer" );
+        PyTools::extract( "dump_deflate", dump_deflate, "Checkpoints"  );
         
-        PyTools::extract( "file_grouping", file_grouping, "Checkpoints", 0, "an integer" );
+        PyTools::extract( "file_grouping", file_grouping, "Checkpoints"  );
         if( file_grouping > 0 ) {
             if( file_grouping > ( unsigned int )( smpi->getSize() ) ) {
                 file_grouping = smpi->getSize();
@@ -88,7 +88,7 @@ Checkpoint::Checkpoint( Params &params, SmileiMPI *smpi ) :
         
         if( params.restart ) {
             std::vector<std::string> restart_files;
-            if( ! PyTools::extract( "restart_files", restart_files, "Checkpoints" ) ) {
+            if( ! PyTools::extractV( "restart_files", restart_files, "Checkpoints" ) ) {
                 ERROR( "Internal parameter `restart_files` not understood. This should not happen" );
             }
             
@@ -275,11 +275,13 @@ void Checkpoint::dumpAll( VectorPatch &vecPatches, unsigned int itime,  SmileiMP
     // Write the diags screen data
     ostringstream diagName( "" );
     if( smpi->isMaster() ) {
+        unsigned int iscreen = 0;
         for( unsigned int idiag=0; idiag<vecPatches.globalDiags.size(); idiag++ ) {
             if( DiagnosticScreen *screen = dynamic_cast<DiagnosticScreen *>( vecPatches.globalDiags[idiag] ) ) {
                 diagName.str( "" );
-                diagName << "DiagScreen" << screen->screen_id;
-                H5::vect( fid, diagName.str(), screen->data_sum );
+                diagName << "DiagScreen" << iscreen;
+                H5::vect( fid, diagName.str(), *(screen->getData()) );
+                iscreen++;
             }
         }
     }
@@ -296,7 +298,7 @@ void Checkpoint::dumpAll( VectorPatch &vecPatches, unsigned int itime,  SmileiMP
         dumpPatch( vecPatches( ipatch )->EMfields, vecPatches( ipatch )->vecSpecies, vecPatches( ipatch )->vecCollisions, params, patch_gid );
         
         // Random number generator state
-        H5::attr( patch_gid, "xorshift32_state", vecPatches( ipatch )->xorshift32_state );
+        H5::attr( patch_gid, "xorshift32_state", vecPatches( ipatch )->rand_->xorshift32_state );
         
         // Close a group
         H5Gclose( patch_gid );
@@ -349,6 +351,10 @@ void Checkpoint::dumpPatch( ElectroMagn *EMfields, std::vector<Species *> vecSpe
             dump_cFieldsPerProc( patch_gid, emAM->Bl_m[imode] );
             dump_cFieldsPerProc( patch_gid, emAM->Br_m[imode] );
             dump_cFieldsPerProc( patch_gid, emAM->Bt_m[imode] );
+            
+            if(params.is_pxr == true)
+                dump_cFieldsPerProc( patch_gid, emAM->rho_old_AM_[imode] );
+            
         }
     }
     
@@ -475,8 +481,8 @@ void Checkpoint::dumpPatch( ElectroMagn *EMfields, std::vector<Species *> vecSpe
             }
             
             
-            H5::vect( gid, "first_index", vecSpecies[ispec]->first_index );
-            H5::vect( gid, "last_index", vecSpecies[ispec]->last_index );
+            H5::vect( gid, "first_index", vecSpecies[ispec]->particles->first_index );
+            H5::vect( gid, "last_index", vecSpecies[ispec]->particles->last_index );
             
         } // End if partSize
         
@@ -589,20 +595,19 @@ void Checkpoint::restartAll( VectorPatch &vecPatches,  SmileiMPI *smpi, SimWindo
     // Read the diags screen data
     ostringstream diagName( "" );
     if( smpi->isMaster() ) {
+        unsigned int iscreen = 0;
         for( unsigned int idiag=0; idiag<vecPatches.globalDiags.size(); idiag++ ) {
             if( DiagnosticScreen *screen = dynamic_cast<DiagnosticScreen *>( vecPatches.globalDiags[idiag] ) ) {
                 diagName.str( "" );
-                diagName << "DiagScreen" << screen->screen_id;
-                int target_size = screen->data_sum.size();
+                diagName << "DiagScreen" << iscreen;
+                int target_size = screen->getData()->size();
                 int vect_size = H5::getVectSize( fid, diagName.str() );
-                int attr_size = H5::getAttrSize( fid, diagName.str() );
                 if( vect_size == target_size ) {
-                    H5::getVect( fid, diagName.str(), screen->data_sum );
-                } else if( attr_size == target_size ) {
-                    H5::getAttr( fid, diagName.str(), screen->data_sum );
+                    H5::getVect( fid, diagName.str(), *(screen->getData()) );
                 } else {
-                    WARNING( "Restart: DiagScreen[" << screen->screen_id << "] size mismatch. Previous data discarded" );
+                    WARNING( "Restart: DiagScreen[" << iscreen << "] size mismatch. Previous data discarded" );
                 }
+                iscreen++;
             }
         }
     }
@@ -618,7 +623,7 @@ void Checkpoint::restartAll( VectorPatch &vecPatches,  SmileiMPI *smpi, SimWindo
         restartPatch( vecPatches( ipatch )->EMfields, vecPatches( ipatch )->vecSpecies, vecPatches( ipatch )->vecCollisions, params, patch_gid );
         
         // Random number generator state
-        H5::getAttr( patch_gid, "xorshift32_state", vecPatches( ipatch )->xorshift32_state );
+        H5::getAttr( patch_gid, "xorshift32_state", vecPatches( ipatch )->rand_->xorshift32_state );
         
         H5Gclose( patch_gid );
         
@@ -667,6 +672,10 @@ void Checkpoint::restartPatch( ElectroMagn *EMfields, std::vector<Species *> &ve
             restart_cFieldsPerProc( patch_gid, emAM->Bl_m[imode] );
             restart_cFieldsPerProc( patch_gid, emAM->Br_m[imode] );
             restart_cFieldsPerProc( patch_gid, emAM->Bt_m[imode] );
+            
+            if(params.is_pxr == true)
+                restart_cFieldsPerProc( patch_gid, emAM->rho_old_AM_[imode] );
+            
         }
     }
     
@@ -819,8 +828,8 @@ void Checkpoint::restartPatch( ElectroMagn *EMfields, std::vector<Species *> &ve
             }
             
             if( params.vectorization_mode == "off" || params.vectorization_mode == "on" || params.cell_sorting ) {
-                H5::getVect( gid, "first_index", vecSpecies[ispec]->first_index, true );
-                H5::getVect( gid, "last_index", vecSpecies[ispec]->last_index, true );
+                H5::getVect( gid, "first_index", vecSpecies[ispec]->particles->first_index, true );
+                H5::getVect( gid, "last_index", vecSpecies[ispec]->particles->last_index, true );
             }
             // In the adaptive vectorization case, the bins will be recomputed
             // latter in the patch reconfiguration

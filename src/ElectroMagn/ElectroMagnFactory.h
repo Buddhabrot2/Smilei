@@ -76,7 +76,7 @@ public:
         for( unsigned int n_extfield = 0; n_extfield < numExtFields; n_extfield++ ) {
             ExtField extField;
             PyObject *profile;
-            PyTools::extract( "field", extField.field, "ExternalField", n_extfield, "a string" );
+            PyTools::extract( "field", extField.field, "ExternalField", n_extfield );
             // Now import the profile
             std::ostringstream name( "" );
             name << "ExternalField[" << n_extfield <<"].profile";
@@ -112,7 +112,7 @@ public:
             ExtTimeField extField;
             PyObject *profile;
             std::string fieldName("");
-            PyTools::extract( "field", fieldName, "PrescribedField", n_extfield, "a string" );
+            PyTools::extract( "field", fieldName, "PrescribedField", n_extfield );
             // Now import the profile
             std::ostringstream name( "" );
             name << "PrescribedField[" << n_extfield <<"].profile";
@@ -166,7 +166,7 @@ public:
             PyObject *profile;
             std::ostringstream name;
             antenna.field = NULL;
-            PyTools::extract( "field", antenna.fieldName, "Antenna", n_antenna, "a string" );
+            PyTools::extract( "field", antenna.fieldName, "Antenna", n_antenna );
             if( antenna.fieldName != "Jx" && antenna.fieldName != "Jy" && antenna.fieldName != "Jz" ) {
                 ERROR( "Antenna #"<<n_antenna<<": parameter 'field' must be one of Jx, Jy, Jz" );
             }
@@ -245,7 +245,7 @@ public:
         for( unsigned int idiag=0; idiag<EMfields->allFields_avg.size(); idiag++ ) {
             for( unsigned int ifield=0; ifield<EMfields->allFields_avg[idiag].size(); ifield++ )
                 newEMfields->allFields_avg[idiag].push_back(
-                    newEMfields->createField( EMfields->allFields_avg[idiag][ifield]->name )
+                                                            newEMfields->createField( EMfields->allFields_avg[idiag][ifield]->name, params )
                 );
         }
         

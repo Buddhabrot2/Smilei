@@ -72,7 +72,7 @@ This rate depends on two Lorentz invariants, the *electron quantum parameter*:
 and the *photon quantum parameter* (at the time of photon emission):
 
 .. math::
-  :label: photonQuantumParameter
+  :label: photonQuantumParameter2
 
   \chi_{\gamma} = \frac{\gamma_{\gamma}}{E_s} \sqrt{ \left({\bf E} + {\bf c} \times {\bf B}\right)^2 - ({\bf c }\cdot{\bf E})^2/c^2 }
 
@@ -95,7 +95,7 @@ In the photon production rate Eq. :eq:`photonProductionRate` appears the quantum
   S(\chi,\xi) = \frac{\sqrt{3}}{2\pi}\,\xi\,\left[\int_{\nu}^{+\infty} {\rm K}_{5/3}(y) dy
   + \frac{\xi^2}{1-\xi}\,{\rm K}_{2/3}(\nu)\right]\,,
 
-with :math:`\nu = 2\xi/[\chi(1-\xi)]`.
+with :math:`\nu = 2\xi/[3\chi(1-\xi)]`.
 
 Finally, the *instantaneous radiated power energy-spectrum* reads:
 
@@ -135,7 +135,7 @@ For arbitrary values of the electron quantum parameter :math:`\chi` (but mandato
 ******************************************************************************************************************************************************
 
 The model of high-energy photon emission described above is generic, and applies for any value of
-the electron quantum parameter** :math:`\chi` (of course as long as the assumptions listed above hold!).
+the electron quantum parameter :math:`\chi` (of course as long as the assumptions listed above hold!).
 In particular, it gives a correct description of high-energy photon emission and its back-reaction on
 the particle (electron or positron) dynamics in the quantum regime :math:`\chi \gtrsim 1`.
 In this regime, photons with energies of the order of the energy of the emitting particle can be produced.
@@ -155,7 +155,7 @@ Intermediate, moderately quantum regime :math:`\chi \lesssim 1`
 In the intermediate regime (:math:`\chi \lesssim 1`), the energy of the emitted photons remains
 small with respect to that of the emitting electrons. Yet, the stochastic nature of photon emission cannot be neglected.
 The electron dynamics can then be described by a stochastic differential equation derived from a Fokker-Planck
-expansion of the full quantum (Monte-Carlo) model described above [Niel2018]_.
+expansion of the full quantum (Monte-Carlo) model described above [Niel2018a]_.
 
 In particular, the change in electron momentum during a time interval :math:`dt` reads:
 
@@ -242,7 +242,7 @@ the most appropriate radiation reaction model for your simulation.
 
 .. Note::
 
-  In [Niel2018]_, an extensive study of the links between the different models for radiation reaction and their domain
+  In [Niel2018a]_, an extensive study of the links between the different models for radiation reaction and their domain
   of applicability is presented. The following table is mainly informative.
 
 .. _radiationRegimes:
@@ -283,7 +283,7 @@ Description of the files:
 * Class ``RadiationFactory``: manages the choice of the radiation model among the following.
 * Class ``RadiationLandauLifshitz``: classical Landau-Lifshitz radiation process.
 * Class ``RadiationCorrLandauLifshitz``: corrected Landau-Lifshitz radiation process.
-* Class ``RadiationNiel``: stochastic diffusive model of [Niel2018]_.
+* Class ``RadiationNiel``: stochastic diffusive model of [Niel2018a]_.
 * Class ``RadiationMonteCarlo``: Monte-Carlo model.
 
 As explained below, many functions have been tabulated because of
@@ -318,7 +318,7 @@ Fokker-Planck stochastic model of Niel *et al*.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Equation :eq:`NielStochasticForce` is implemented in :program:`Smilei` using
-a simple explicit scheme, see [Niel2018]_ Sec. VI.B for more details.
+a simple explicit scheme, see [Niel2018a]_ Sec. VI.B for more details.
 This stochastic diffusive model is accessible in the species configuration
 under the name ``Niel``.
 
@@ -544,7 +544,7 @@ follow the same trajectories.
 The stochastic nature of the emission for high :math:`\chi` values can
 have consequences in term of final spatial and energy distributions.
 Not shown here, the Niel stochastic model does not reproduce correctly the
-moment of order 3 as explained in [Niel2018]_.
+moment of order 3 as explained in [Niel2018a]_.
 
 Synchrotron, 2D
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -851,10 +851,6 @@ References
 .. [Lobet2013] `Lobet et al. (2016), J. Phys.: Conf. Ser. 688, 012058 <http://iopscience.iop.org/article/10.1088/1742-6596/688/1/012058>`_
 
 .. [Lobet2015] `Lobet (2015), Effets radiatifs et d'électrodynamique quantique dans l'interaction laser-matière ultra-relativiste (2015) <http://www.theses.fr/2015BORD0361#>`_
-
-.. [Niel2018a] `Niel et al. (2018a), Phys. Rev. E 97, 043209 <https://doi.org/10.1103/PhysRevE.97.043209>`_
-
-.. [Niel2018b] `Niel et al. (2018b), From quantum to classical modelling of radiation reaction: a focus on the radiation spectrum, Plasma Phys. Control. Fusion 60, 094002 (2018) <http://iopscience.iop.org/article/10.1088/1361-6587/aace22>`_
 
 .. [Ridgers2017] `Ridgers et al. (2017), Journal of Plasma Physics, 83(5) <https://doi.org/10.1017/S0022377817000642>`_
 

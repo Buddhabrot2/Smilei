@@ -7,7 +7,7 @@
 using namespace std;
 
 DiagnosticFields::DiagnosticFields( Params &params, SmileiMPI *smpi, VectorPatch &vecPatches, int ndiag, OpenPMDparams &oPMD ):
-    Diagnostic( oPMD )
+    Diagnostic( &oPMD, "DiagFields", ndiag )
 {
     //MESSAGE("Starting diag field creation " );
     fileId_ = 0;
@@ -22,7 +22,7 @@ DiagnosticFields::DiagnosticFields( Params &params, SmileiMPI *smpi, VectorPatch
     
     // Extract the time_average parameter
     time_average = 1;
-    PyTools::extract( "time_average", time_average, "DiagFields", ndiag, "an integer" );
+    PyTools::extract( "time_average", time_average, "DiagFields", ndiag );
     if( time_average < 1 ) {
         time_average = 1;
     }
@@ -35,20 +35,20 @@ DiagnosticFields::DiagnosticFields( Params &params, SmileiMPI *smpi, VectorPatch
     
     // Extract the requested fields
     vector<string> fieldsToDump( 0 );
-    PyTools::extract( "fields", fieldsToDump, "DiagFields", ndiag );
+    PyTools::extractV( "fields", fieldsToDump, "DiagFields", ndiag );
    
     //Avoid modes repetition in the namelist by interpreting field quantity as all modes of this quantity
     if (params.geometry == "AMcylindrical") {
         vector<string> fieldsToAdd( 0 );
-        for (int ifield = 0; ifield < fieldsToDump.size(); ifield++){
-            if (fieldsToDump[ifield].find("_mode_") ==  std::string::npos) {
-                for (unsigned int imode = 1; imode < params.nmodes; imode ++){
+        for( unsigned int ifield = 0; ifield < fieldsToDump.size(); ifield++ ){
+            if( fieldsToDump[ifield].find("_mode_") ==  std::string::npos ) {
+                for( unsigned int imode = 1; imode < params.nmodes; imode ++ ){
                     fieldsToAdd.push_back(fieldsToDump[ifield]+"_mode_"+to_string(imode));
                 }
                 fieldsToDump[ifield] = fieldsToDump[ifield] + "_mode_0" ;
             }
         }
-        for (int ifield = 0; ifield < fieldsToAdd.size(); ifield++){
+        for( unsigned int ifield = 0; ifield < fieldsToAdd.size(); ifield++ ){
             fieldsToDump.push_back(fieldsToAdd[ifield]);
         }
     }
@@ -106,7 +106,7 @@ DiagnosticFields::DiagnosticFields( Params &params, SmileiMPI *smpi, VectorPatch
             subgrid_start_.push_back( 0 );
             subgrid_stop_ .push_back( params.n_space_global[isubgrid]+2 );
             subgrid_step_ .push_back( 1 );
-        } else if( PyTools::convert( subgrids[isubgrid], n ) ) {
+        } else if( PyTools::py2scalar( subgrids[isubgrid], n ) ) {
             subgrid_start_.push_back( n );
             subgrid_stop_ .push_back( n + 1 );
             subgrid_step_ .push_back( 1 );
@@ -144,7 +144,7 @@ DiagnosticFields::DiagnosticFields( Params &params, SmileiMPI *smpi, VectorPatch
             if( time_average > 1 ) {
                 for( unsigned int ifield=0; ifield<fields_names.size(); ifield++ )
                     vecPatches( ipatch )->EMfields->allFields_avg[diag_n].push_back(
-                        vecPatches( ipatch )->EMfields->createField( fields_names[ifield] )
+                        vecPatches( ipatch )->EMfields->createField( fields_names[ifield],params )
                     );
             }
         }
@@ -227,6 +227,8 @@ void DiagnosticFields::openFile( Params &params, SmileiMPI *smpi, bool newfile )
         H5Pset_fapl_mpio( pid, MPI_COMM_WORLD, MPI_INFO_NULL );
         fileId_  = H5Fcreate( filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, pid );
         H5Pclose( pid );
+        
+        H5::attr( fileId_, "name", diag_name_ );
         
         // Attributes for openPMD
         openPMD_->writeRootAttributes( fileId_, "", "no_particles" );
@@ -377,6 +379,8 @@ void DiagnosticFields::run( SmileiMPI *smpi, VectorPatch &vecPatches, int itime,
             // Close dataset
             H5Dclose( dset_id );
         }
+        #pragma omp barrier
+
     }
     
     #pragma omp master
@@ -394,6 +398,7 @@ void DiagnosticFields::run( SmileiMPI *smpi, VectorPatch &vecPatches, int itime,
             H5Fflush( fileId_, H5F_SCOPE_GLOBAL );
         }
     }
+    #pragma omp barrier
 }
 
 bool DiagnosticFields::needsRhoJs( int itime )

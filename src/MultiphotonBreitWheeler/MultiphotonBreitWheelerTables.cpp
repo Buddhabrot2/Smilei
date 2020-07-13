@@ -59,7 +59,7 @@ void MultiphotonBreitWheelerTables::initialization( Params &params, SmileiMPI *s
     if( PyTools::nComponents( "MultiphotonBreitWheeler" ) ) {
 
         // Path to the databases
-        PyTools::extract( "table_path", table_path_, "MultiphotonBreitWheeler", 0, "a string" );
+        PyTools::extract( "table_path", table_path_, "MultiphotonBreitWheeler"  );
     }
 
     // Computation of some parameters
@@ -169,7 +169,7 @@ double MultiphotonBreitWheelerTables::computeBreitWheelerPairProductionRate( dou
 //
 //! \param photon_chi photon quantum parameter
 // -----------------------------------------------------------------------------
-double *MultiphotonBreitWheelerTables::computePairQuantumParameter( double photon_chi )
+double *MultiphotonBreitWheelerTables::computePairQuantumParameter( double photon_chi, Random * rand )
 {
     // Parameters
     double *chi = new double[2];
@@ -207,7 +207,8 @@ double *MultiphotonBreitWheelerTables::computePairQuantumParameter( double photo
     // ---------------------------------------
 
     // First, we compute a random xip in [0,1[
-    xip = Rand::uniform();
+    // xip = Rand::uniform();
+    xip = rand->uniform();
 
     // The array uses the symmetric properties of the T fonction,
     // Cases xip > or <= 0.5 are treated seperatly

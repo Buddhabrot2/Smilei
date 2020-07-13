@@ -80,7 +80,7 @@ vector<double> matrixTimesVector( vector<double> A, vector<double> v )
 
 
 DiagnosticProbes::DiagnosticProbes( Params &params, SmileiMPI *smpi, VectorPatch &vecPatches, int n_probe )
-    : offset_in_MPI( 0 )
+    : Diagnostic( nullptr, "DiagProbe", n_probe ), offset_in_MPI( 0 )
 {
     probe_n = n_probe;
     nDim_particle = params.nDim_particle;
@@ -107,7 +107,7 @@ DiagnosticProbes::DiagnosticProbes( Params &params, SmileiMPI *smpi, VectorPatch
 
     // Extract "number" (number of points you have in each dimension of the probe,
     // which must be smaller than the code dimensions)
-    PyTools::extract( "number", vecNumber, "DiagProbe", n_probe );
+    PyTools::extractV( "number", vecNumber, "DiagProbe", n_probe );
 
     // Dimension of the probe grid
     dimProbe=vecNumber.size();
@@ -131,7 +131,7 @@ DiagnosticProbes::DiagnosticProbes( Params &params, SmileiMPI *smpi, VectorPatch
 
     // Extract origin and corners
     // (positions of the vertices of the grid)
-    if( ! PyTools::extract( "origin", origin, "DiagProbe", n_probe ) ) {
+    if( ! PyTools::extractV( "origin", origin, "DiagProbe", n_probe ) ) {
         ERROR( "Probe #"<<n_probe<<": origin missing" );
     }
 
@@ -140,8 +140,8 @@ DiagnosticProbes::DiagnosticProbes( Params &params, SmileiMPI *smpi, VectorPatch
     }
 
     corners.resize( 0 );
-    bool has_corners = PyTools::extract( "corners", corners, "DiagProbe", n_probe );
-    bool has_vectors = PyTools::extract( "vectors", corners, "DiagProbe", n_probe );
+    bool has_corners = PyTools::extractVV( "corners", corners, "DiagProbe", n_probe );
+    bool has_vectors = PyTools::extractVV( "vectors", corners, "DiagProbe", n_probe );
     if( has_corners && has_vectors ) {
         ERROR( "Probe #"<<n_probe<<": cannot define both `corners` and `vectors`" );
     }
@@ -201,7 +201,7 @@ DiagnosticProbes::DiagnosticProbes( Params &params, SmileiMPI *smpi, VectorPatch
 
     // Extract the list of requested fields
     vector<string> fs;
-    if( !PyTools::extract( "fields", fs, "DiagProbe", n_probe ) ) {
+    if( !PyTools::extractV( "fields", fs, "DiagProbe", n_probe ) ) {
         fs.resize( 10 );
         fs[0]="Ex";
         fs[1]="Ey";
@@ -214,14 +214,14 @@ DiagnosticProbes::DiagnosticProbes( Params &params, SmileiMPI *smpi, VectorPatch
         fs[8]="Jz";
         fs[9]="Rho";
         if( params.Laser_Envelope_model ) {
-            fs.resize( 13 );
+            fs.resize( 14 );
             fs[10]="Env_A_abs";
-            fs[11]="Env_Chi", fs[12]="Env_E_abs";
+            fs[11]="Env_Chi", fs[12]="Env_E_abs",fs[13]="Env_Ex_abs";
         }
     }
     vector<unsigned int> locations;
-    locations.resize( 13 );
-    for( unsigned int i=0; i<13; i++ ) {
+    locations.resize( 14 );
+    for( unsigned int i=0; i<14; i++ ) {
         locations[i] = fs.size();
     }
     unsigned int nspec = vecPatches(0)->vecSpecies.size();
@@ -263,7 +263,9 @@ DiagnosticProbes::DiagnosticProbes( Params &params, SmileiMPI *smpi, VectorPatch
             locations[11] = i;
         } else if( fs[i]=="Env_E_abs" ) {
             locations[12] = i;
-        } else {
+        } else if( fs[i]=="Env_Ex_abs" ) {
+            locations[13] = i;
+        }else {
             // Species-related field
             size_t i0 = fs[i].find( "_" );
             size_t i1 = fs[i].rfind( "_" );
@@ -378,13 +380,15 @@ void DiagnosticProbes::openFile( Params &params, SmileiMPI *smpi, bool newfile )
         H5Pset_fapl_mpio( pid, MPI_COMM_WORLD, MPI_INFO_NULL );
         fileId_ = H5Fcreate( filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, pid );
         H5Pclose( pid );
-
+        
+        H5::attr( fileId_, "name", diag_name_ );
+        
         // Write the version of the code as an attribute
         H5::attr( fileId_, "Version", string( __VERSION ) );
-
+        
         // Dimension of the probe grid
         H5::attr( fileId_, "dimension", dimProbe );
-
+        
         // Add arrays "p0", "p1", ...
         H5::vect( fileId_, "p0", origin );
         ostringstream pk;
@@ -782,19 +786,20 @@ void DiagnosticProbes::run( SmileiMPI *smpi, VectorPatch &vecPatches, int timest
         // Probes for envelope
         if( patch->EMfields->envelope != NULL ) {
             iPart_MPI = offset_in_MPI[ipatch];
-            double Env_AabsLoc_fields, Env_ChiLoc_fields, Env_EabsLoc_fields;
+            double Env_AabsLoc_fields, Env_ChiLoc_fields, Env_EabsLoc_fields, Env_ExabsLoc_fields;
             for( unsigned int ipart=0; ipart<npart; ipart++ ) {
                 int iparticle( ipart ); // Compatibility
                 patch->probesInterp->envelopeAndSusceptibility(
                     patch->EMfields,
                     patch->probes[probe_n]->particles,
                     iparticle,
-                    &Env_AabsLoc_fields, &Env_ChiLoc_fields, &Env_EabsLoc_fields
+                    &Env_AabsLoc_fields, &Env_ChiLoc_fields, &Env_EabsLoc_fields, &Env_ExabsLoc_fields
                 );
                 //! here we fill the probe data!!!
                 ( *probesArray )( fieldlocation[10], iPart_MPI )=Env_AabsLoc_fields;
                 ( *probesArray )( fieldlocation[11], iPart_MPI )=Env_ChiLoc_fields;
                 ( *probesArray )( fieldlocation[12], iPart_MPI )=Env_EabsLoc_fields;
+                ( *probesArray )( fieldlocation[13], iPart_MPI )=Env_ExabsLoc_fields;
                 iPart_MPI++;
             } // END for ipart
         } // END if envelope
