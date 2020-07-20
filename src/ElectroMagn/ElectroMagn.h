@@ -484,7 +484,7 @@ public:
     std::vector<ElectroMagnBC *> emBoundCond;
 	
 	//! Vector for materials
-	std::vector<Material*> material;
+	std::vector<Material *> material;
     
     //! from smpi is xmin
     bool isXmin;

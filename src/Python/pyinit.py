@@ -517,6 +517,12 @@ class PrescribedField(SmileiComponent):
     field = None
     profile = None
 
+#materials to interact with emfield
+class Material(SmileiComponent):
+    """Material"""
+    name = None
+    profile = None
+    
 # external current (antenna)
 class Antenna(SmileiComponent):
     """Antenna"""

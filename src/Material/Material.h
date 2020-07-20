@@ -1,14 +1,22 @@
-#include<String>
+#ifndef Material_H
+#define Material_H
+
+#include<string>
 #include "Profile.h"
 
 class ElectroMagn;
 
-class Material
-{
+class Material{
 	public:
+		
+	Material();
+	~Material();
 	
-	void apply(ElectroMagn *field);
+	void applyElectric(ElectroMagn *field);
 	
-	Pofile profile;
+	Profile* profile;
 	std::string name;
-}
+};
+
+
+#endif

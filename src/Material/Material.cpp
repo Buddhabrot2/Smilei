@@ -1,5 +1,11 @@
 #include "Material.h"
 
-Material::apply(ElectroMagn *field){
+Material::Material(){
+}
+
+Material::~Material(){
+}
+
+void Material::applyElectric(ElectroMagn *field){
 	return;
 }
