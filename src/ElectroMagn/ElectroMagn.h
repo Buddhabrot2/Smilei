@@ -9,6 +9,7 @@
 #include "Tools.h"
 #include "Profile.h"
 #include "Species.h"
+#include "Material.h"
 
 
 class Params;
@@ -481,6 +482,9 @@ public:
     
     //! Vector of boundary-condition per side for the fields
     std::vector<ElectroMagnBC *> emBoundCond;
+	
+	//! Vector for materials
+	std::vector<Material*> material;
     
     //! from smpi is xmin
     bool isXmin;

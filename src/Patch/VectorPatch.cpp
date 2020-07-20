@@ -1053,6 +1053,42 @@ void VectorPatch::solveMaxwell( Params &params, SimWindow *simWindow, int itime,
         // Current correction in spectral space
         (*this)( 0 )->EMfields->MaxwellAmpereSolver_->densities_correction( (*this)( 0 )->EMfields );
     }
+//>>>> buddhabrot
+
+//here is where i need to apply the metal. i need to:
+// 1. make a class material, which 
+//	      has a member function apply(Electromagn *fields), that changes the values of E and B according to the material model (structure like the solvers!)
+//            apply accesses the fields via the fields [] operator
+//	      stores the material properties like permittivity, resistivity, permeability and the
+//        profile, which defines which cells are metal.
+//        may actually be supplemented by classes of the type material2D, which implement specific dimensional versions of material->apply
+//    status: made the header and empty implementation
+// 2.  change ElectroMagnFactory, which should call the constructor of material and  
+//        uses PyTools to extract a profile and the material properties from the namelist and gives them to the constructor of material
+//    status: extracting the profile should work, material properties not implemented yet
+// 3.  make a vector of material objects a member of ElectroMagn
+//    done
+// 4.  change VectorPatch to call ((*this)(ipatch)->EMfields->material(imat))((*this)(ipatch)->EMfields)
+//          its unclear where to apply e and b field. in the reflective boundary condition, only the b field seems to be affected. flux through the surface and derivative of tangential 
+//          field are forced to be 0. how does this all work with the lockstep?
+
+//        the profile has a valueat function i should use. the valuat takes a pos value, which is calculated from the patches global index. see example:
+//        void ElectroMagn2D::applyPrescribedField( Field *my_field,  Profile *profile, Patch *patch, double time )
+
+// saveMagneticFields copies fields B to B_m, for istance Bx to Bx_m
+
+//general algo (no AMcyclindrical): 
+// filter current
+// save old magnetic field 
+// calculate new electric field from old magnetic field and current (j) (as a change (+=) to the old field) (MA_solver)
+// calculate new magnetic field from new electric field (MF_solver)
+// apply boundaries
+// calculated time-centered magnetic fields
+
+
+// it seems the material should be applied after the MA solver.
+
+//<<<<<<< buddhabrot
 
     #pragma omp for schedule(static)
     for( unsigned int ipatch=0 ; ipatch<this->size() ; ipatch++ ) {
@@ -1065,6 +1101,19 @@ void VectorPatch::solveMaxwell( Params &params, SimWindow *simWindow, int itime,
         // E is already synchronized because J has been synchronized before.
         ( *( *this )( ipatch )->EMfields->MaxwellAmpereSolver_ )( ( *this )( ipatch )->EMfields );
     }
+
+//>>>>buddhabrot
+
+    #pragma omp for schedule(static)
+    for( unsigned int ipatch=0 ; ipatch<this->size() ; ipatch++ ) {
+        if( params.geometry != "AMcylindrical"  ) { //buddhabrot: maybe additional requirements are needed (the spectral stuff)
+			for( unsigned int imat=0 ; ( *this )( ipatch )->EMfields->material(imat).size
+            ( *this )( ipatch )->EMfields.material[imat]->apply(( *this )( ipatch )->EMfields);
+        }
+    }
+
+
+//<<<<buddhabrot
 
     #pragma omp for schedule(static)
     for( unsigned int ipatch=0 ; ipatch<this->size() ; ipatch++ ) {

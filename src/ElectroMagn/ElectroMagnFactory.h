@@ -14,7 +14,7 @@
 #include "Params.h"
 #include "Laser.h"
 #include "Tools.h"
-
+#include "Material.h"
 
 class ElectroMagnFactory
 {
@@ -197,7 +197,35 @@ public:
             EMfields->antennas.push_back( antenna );
         }
         
+		//<<<<< buddhabrot
+		// ----------------- 
+        // materials properties
+        // -----------------
         
+        unsigned int material_number =PyTools::nComponents( "Material" );
+        if( patch->isMaster() && material_number > 0) {
+            TITLE("Initializing Materials" );
+        }
+        for( unsigned int n_material = 0; n_material < PyTools::nComponents( "Material" ); n_material++ ) {
+            Material materialObject;
+            PyObject *profile;
+            std::string materialName("");
+            PyTools::extract( "Name", materialName, "Material", n_material ); //wut, why
+			materialObject.name = materialName;
+            // Now import the profile
+            std::ostringstream name( "" );
+            name << "Material[" << n_extfield <<"].profile";
+            if( !PyTools::extract_pyProfile( "profile", profile, "Material", n_extfield ) ) {
+                ERROR( "Material #"<<n_extfield<<": parameter 'profile' not understood" );
+            }
+            materialObject.profile = new Profile( profile, params.nDim_field, name.str(), true );
+            
+			//number of dimensions is in params.nDim_field == 1. if i make specific dimension versions of masterial, here is a good place to initilize them
+			
+            EMfields->material.push_back( materialObject );
+        }
+		
+		//>>>>> buddhabrot
         return EMfields;
     }
     
