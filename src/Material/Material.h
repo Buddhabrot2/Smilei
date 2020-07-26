@@ -9,13 +9,13 @@ class ElectroMagn;
 class Material{
 	public:
 		
-	Material();
+	Material(unsigned int dims);
 	~Material();
-	
-	void applyElectric(ElectroMagn *field);
-	
+		
 	Profile* profile;
 	std::string name;
+	unsigned int n_dimensions;
+	
 };
 
 

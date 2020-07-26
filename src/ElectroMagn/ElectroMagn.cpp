@@ -542,7 +542,7 @@ double ElectroMagn::computeNRJ()
     return nrj;
 }
 
-void ElectroMagn::applyExternalFields( Patch *patch )
+void ElectroMagn::vFields( Patch *patch )
 {
     for( vector<ExtField>::iterator extfield=extFields.begin(); extfield!=extFields.end(); extfield++ ) {
         if( extfield->index < allFields.size() ) {

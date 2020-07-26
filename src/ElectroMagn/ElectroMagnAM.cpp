@@ -1802,6 +1802,9 @@ void ElectroMagnAM::initAntennas( Patch *patch, Params& params )
             applyExternalField( antennas[i].field, antennas[i].space_profile, patch );
         }
     }
-    
+    //<<buddhabrot
+	
+	//<< buddhabrot
 }
 
+void ElectroMagnAM::applyMaterialE(Patch * patch) {}

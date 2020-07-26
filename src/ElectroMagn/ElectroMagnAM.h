@@ -230,6 +230,10 @@ public:
     
     //!Pointers toward R inverse values stored in patch
     double *invR, *invRd; 
+	
+	//>>buddhabrot
+	void applyMaterialE(Patch * patch);
+	//<<buddhabrot
 };
 
 #endif

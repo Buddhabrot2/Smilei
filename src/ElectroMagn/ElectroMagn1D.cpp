@@ -873,3 +873,33 @@ void ElectroMagn1D::initAntennas( Patch *patch, Params& params )
     }
     
 }
+
+//>>buddhabrot
+
+void ElectroMagn1D::applyMaterialE(Patch *patch){
+	ElectroMagn *fields = patch->EMfields;
+	//static casts
+	Field1D *Ex1D = static_cast<Field1D *>( fields->Ex_ );
+    Field1D *Ey1D = static_cast<Field1D *>( fields->Ey_ );
+    Field1D *Ez1D = static_cast<Field1D *>( fields->Ez_ );
+	// TODO: are all 3 components really defined?
+	
+	//get starting position
+	vector<double> pos( 1 );
+    pos[0] = dx * ( ( double )( patch->getCellStartingGlobalIndex( 0 ) )+( Ex1D->isDual( 0 )?-0.5:0. ) );
+    int N = ( int )Ex1D->dims()[0];
+    
+	//set E to zero, if the profile indicates so
+    // USING UNSIGNED INT CREATES PB WITH PERIODIC BCs
+	for( unsigned int imat=0; imat < fields->material.size(); imat++){
+		for( int i=0 ; i<N ; i++ ) {
+			if(fields->material[imat]->profile->valueAt( pos) > 0){
+				( *Ex1D )( i )  = 0;
+				( *Ey1D )( i )  = 0;
+				( *Ez1D )( i )  = 0;
+			}
+			pos[0] += dx;
+		}
+	}
+}
+// <<buddhabrot

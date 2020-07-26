@@ -483,9 +483,13 @@ public:
     //! Vector of boundary-condition per side for the fields
     std::vector<ElectroMagnBC *> emBoundCond;
 	
+	//>> buddhabrot
 	//! Vector for materials
 	std::vector<Material *> material;
     
+	virtual void applyMaterialE(Patch* patch){};
+	
+	//>>buddhabrot
     //! from smpi is xmin
     bool isXmin;
     

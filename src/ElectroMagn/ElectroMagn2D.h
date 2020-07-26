@@ -37,7 +37,11 @@ public:
     void sum_rel_fields_to_em_fields( Patch *patch );
     void centeringE( std::vector<double> E_Add );
     void centeringErel( std::vector<double> E_Add );
-    
+	
+	//>>buddharot
+	void applyMaterialE(Patch *patch );
+    //<<buddhabrot
+	
     double getEx_Xmin()
     {
         return 0.;

@@ -1,11 +1,12 @@
 #include "Material.h"
 
-Material::Material(){
+Material::Material(unsigned int dims){
+	n_dimensions = dims;
 }
 
 Material::~Material(){
 }
 
-void Material::applyElectric(ElectroMagn *field){
-	return;
-}
+
+
+

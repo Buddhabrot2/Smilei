@@ -207,7 +207,7 @@ public:
             TITLE("Initializing Materials" );
         }
         for( unsigned int n_material = 0; n_material < material_number; n_material++ ) {
-            Material* materialObject=new Material();
+            Material* materialObject=new Material(params.nDim_field);
             PyObject *profile;
             std::string materialName("");
             PyTools::extract( "name", materialName, "Material", n_material ); 
@@ -219,9 +219,7 @@ public:
                 ERROR( "Material #"<<n_material<<": parameter 'profile' not understood" );
             }
             materialObject->profile = new Profile( profile, params.nDim_field, name.str(), true );
-            
-			//number of dimensions is in params.nDim_field == 1. if i make specific dimension versions of masterial, here is a good place to initilize them
-			
+           			
             EMfields->material.push_back( materialObject );
         }
 		
@@ -333,6 +331,12 @@ public:
             newEMfields->antennas.push_back( antenna );
         }
         
+		//>>buddhabrot
+		//clone material
+		for(unsigned int imat=0;imat<EMfields->material.size();imat++){
+			newEMfields->material[imat] = EMfields->material[imat];
+		}
+		//<<buddhabrot
         //newEMfields->finishInitialization(vecSpecies.size(), patch);
         
         return newEMfields;

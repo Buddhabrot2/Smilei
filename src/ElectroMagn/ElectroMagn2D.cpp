@@ -1514,3 +1514,37 @@ void ElectroMagn2D::initAntennas( Patch *patch, Params& params )
     
 }
 
+//>>buddhabrot
+void ElectroMagn2D::applyMaterialE(Patch *patch){
+    ElectroMagn *fields = patch->EMfields;
+
+	//static casts
+	Field2D *Ex2D = static_cast<Field2D *>( fields->Ex_ );
+    Field2D *Ey2D = static_cast<Field2D *>( fields->Ey_ );
+    Field2D *Ez2D = static_cast<Field2D *>( fields->Ez_ );
+	
+	//get starting position
+	vector<double> pos( 2, 0 );
+    pos[0]      = dx*( ( double )( patch->getCellStartingGlobalIndex( 0 ) )+( Ex2D->isDual( 0 )?-0.5:0. ) );
+    double pos1 = dy*( ( double )( patch->getCellStartingGlobalIndex( 1 ) )+( Ex2D->isDual( 1 )?-0.5:0. ) );
+    int N0 = ( int )Ex2D->dims()[0];
+    int N1 = ( int )Ex2D->dims()[1];
+	
+	//set E to zero, if the profile indicates so (this belongs in the material class)
+	for( unsigned int imat=0; imat < fields->material.size(); imat++){
+		for( int i=0 ; i<N0 ; i++ ) {
+			pos[1] = pos1;
+			for( int j=0 ; j<N1 ; j++ ) {
+				if(fields->material[imat]->profile->valueAt( pos) > 0){
+					( *Ex2D )( i, j ) = 0;
+					( *Ey2D )( i, j ) = 0;
+					( *Ez2D )( i, j ) = 0;
+				}
+				pos[1] += dy;
+			}
+			pos[0] += dx;
+		}
+	}
+}
+//<<buddhabrot
+
