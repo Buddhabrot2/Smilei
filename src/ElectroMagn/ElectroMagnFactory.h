@@ -207,19 +207,20 @@ public:
             TITLE("Initializing Materials" );
         }
         for( unsigned int n_material = 0; n_material < material_number; n_material++ ) {
-            Material* materialObject=new Material(params.nDim_field);
             PyObject *profile;
             std::string materialName("");
             PyTools::extract( "name", materialName, "Material", n_material ); 
-			materialObject->name = materialName;
             // Now import the profile
             std::ostringstream name( "" );
             name << "Material[" << n_material <<"].profile";
             if( !PyTools::extract_pyProfile( "profile", profile, "Material", n_material ) ) {
                 ERROR( "Material #"<<n_material<<": parameter 'profile' not understood" );
             }
+			
+			Material* materialObject=new Material(params.nDim_field);
+			
+			materialObject->name = materialName;
             materialObject->profile = new Profile( profile, params.nDim_field, name.str(), true );
-           			
             EMfields->material.push_back( materialObject );
         }
 		
@@ -333,9 +334,9 @@ public:
         
 		//>>buddhabrot
 		//clone material
-		for(unsigned int imat=0;imat<EMfields->material.size();imat++){
-			newEMfields->material[imat] = EMfields->material[imat];
-		}
+		//for(unsigned int imat=0;imat<EMfields->material.size();imat++){
+			newEMfields->material = EMfields->material;
+		//}
 		//<<buddhabrot
         //newEMfields->finishInitialization(vecSpecies.size(), patch);
         

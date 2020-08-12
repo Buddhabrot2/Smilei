@@ -1104,12 +1104,16 @@ void VectorPatch::solveMaxwell( Params &params, SimWindow *simWindow, int itime,
 
 //>>>>buddhabrot
 
-    #pragma omp for schedule(static)
+    #pragma omp single//for schedule(static)
+	{
     for( unsigned int ipatch=0 ; ipatch<this->size() ; ipatch++ ) {
         if( params.geometry != "AMcylindrical"  ) { //buddhabrot: maybe additional requirements are needed (the spectral stuff) -  TODO: still need to understand it
-			( *this )( ipatch )->EMfields->applyMaterialE(( *this )( ipatch ));
+			( *this )( ipatch )->EMfields->applyMaterialE( ( *this )( ipatch )->EMfields->Ex_, ( *this )( ipatch ));
+			( *this )( ipatch )->EMfields->applyMaterialE( ( *this )( ipatch )->EMfields->Ey_, ( *this )( ipatch ));
+			( *this )( ipatch )->EMfields->applyMaterialE( ( *this )( ipatch )->EMfields->Ez_, ( *this )( ipatch ));
         }
     }
+	}
 
 
 //<<<<buddhabrot

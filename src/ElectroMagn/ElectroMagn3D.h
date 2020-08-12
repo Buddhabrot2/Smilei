@@ -35,7 +35,7 @@ public:
     void centeringE( std::vector<double> E_Add );
     void centeringErel( std::vector<double> E_Add );
     //>>buddhabrot
-	void applyMaterialE(Patch *patch);
+	void applyMaterialE(Field *myField, Patch *patch);
 	//<<buddhabrot
 	
     double getEx_Xmin()

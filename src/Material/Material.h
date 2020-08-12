@@ -3,8 +3,11 @@
 
 #include<string>
 #include "Profile.h"
+#include "Field.h"
 
 class ElectroMagn;
+
+
 
 class Material{
 	public:
@@ -13,9 +16,11 @@ class Material{
 	~Material();
 		
 	Profile* profile;
-	std::string name;
-	unsigned int n_dimensions;
 	
+	std::string name;
+	
+	unsigned int n_dimensions;
+			
 };
 
 

@@ -1978,22 +1978,27 @@ void ElectroMagn3D::initAntennas( Patch *patch, Params& params )
 }
 
 //>>buddhabrot
-void ElectroMagn3D::applyMaterialE(Patch *patch){
+void ElectroMagn3D::applyMaterialE(Field *myField, Patch *patch){
     ElectroMagn *fields = patch->EMfields;
 	//static casts
-	Field3D *Ex3D = static_cast<Field3D *>( fields->Ex_ );
-    Field3D *Ey3D = static_cast<Field3D *>( fields->Ey_ );
-    Field3D *Ez3D = static_cast<Field3D *>( fields->Ez_ );
+	Field3D *field = static_cast<Field3D *>( myField);
+
 	
 	//get starting position
 	
 	vector<double> pos( 3 );
-    pos[0]      = dx*( ( double )( patch->getCellStartingGlobalIndex( 0 ) )+( Ex3D->isDual( 0 )?-0.5:0. ) );
-    double pos1 = dy*( ( double )( patch->getCellStartingGlobalIndex( 1 ) )+( Ex3D->isDual( 1 )?-0.5:0. ) );
-    double pos2 = dz*( ( double )( patch->getCellStartingGlobalIndex( 2 ) )+( Ex3D->isDual( 2 )?-0.5:0. ) );
-    int N0 = ( int )Ex3D->dims()[0];
-    int N1 = ( int )Ex3D->dims()[1];
-    int N2 = ( int )Ex3D->dims()[2];
+	vector<int> idx( 3 );
+	idx[0] = ( ( double )( patch->getCellStartingGlobalIndex( 0 ) )+( field->isDual( 0 )?-0.5:0. ) );
+	idx[1] = ( ( double )( patch->getCellStartingGlobalIndex( 1 ) )+( field->isDual( 0 )?-0.5:0. ) );
+	idx[2] = ( ( double )( patch->getCellStartingGlobalIndex( 2 ) )+( field->isDual( 0 )?-0.5:0. ) );
+    
+	pos[0]      = dx*( ( double )( patch->getCellStartingGlobalIndex( 0 ) )+( field->isDual( 0 )?-0.5:0. ) );
+    double pos1 = dy * idx[1];
+    double pos2 = dz * idx[2];
+	
+    int N0 = ( int )field->dims()[0];
+    int N1 = ( int )field->dims()[1];
+    int N2 = ( int )field->dims()[2];
 
 	//buddhabrot: this is different then in electromagn3D->applyPrescribed, which is isconsisten with 1D and 2D
 	for( unsigned int imat=0; imat < fields->material.size(); imat++){
@@ -2003,9 +2008,7 @@ void ElectroMagn3D::applyMaterialE(Patch *patch){
 				pos[2] = pos2;
 				for( int k=0 ; k<N2 ; k++ ) {
 					if(fields->material[imat]->profile->valueAt( pos) > 0){
-						(*Ex3D)(i,j,k) = 0;
-						(*Ey3D)(i,j,k) = 0;
-						(*Ez3D)(i,j,k) = 0;
+						(*field)(i,j,k) = 0;
 					}
 					pos[2] += dz;
 				}
