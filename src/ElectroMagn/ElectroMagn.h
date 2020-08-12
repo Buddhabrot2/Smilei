@@ -487,7 +487,7 @@ public:
 	//! Vector for materials
 	std::vector<Material *> material;
     
-	virtual void applyMaterialE(Field *myField, Patch *patch){};
+	virtual void applyMaterialB(Field *myField, Field *myField_m,  Patch *patch){};
 	
 	//>>buddhabrot
     //! from smpi is xmin

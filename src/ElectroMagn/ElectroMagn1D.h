@@ -38,7 +38,7 @@ public:
     void centeringE( std::vector<double> E_Add );
     void centeringErel( std::vector<double> E_Add );
 	
-	void applyMaterialE(Field *myField, Patch *patch);
+	void applyMaterialB(Field *myField, Field *myField_m,  Patch *patch);
     
     double getEx_Xmin()
     {

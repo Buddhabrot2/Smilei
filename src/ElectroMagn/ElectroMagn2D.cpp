@@ -1515,11 +1515,12 @@ void ElectroMagn2D::initAntennas( Patch *patch, Params& params )
 }
 
 //>>buddhabrot
-void ElectroMagn2D::applyMaterialE(Field *myField, Patch *patch){
+void ElectroMagn2D::applyMaterialB(Field *myField, Field *myField_m, Patch *patch){
     ElectroMagn *fields = patch->EMfields;
 
 	//static casts
 	Field2D *field = static_cast<Field2D *>( myField );
+	Field2D *field_m = static_cast<Field2D *>( myField_m );
 	
 	//get starting position
 	vector<double> pos( 2, 0 );
@@ -1537,7 +1538,7 @@ void ElectroMagn2D::applyMaterialE(Field *myField, Patch *patch){
 			pos[1] = pos1;
 			for( int j=0 ; j<N1 ; j++ ) {
 				if(fields->material[imat]->profile->valueAt( pos) > 0){ //this is slow! and the work should be done in the material class
-					( *field )( i, j ) = 0; //this line works
+					( *field )( i, j ) = (*field_m)(i, j); //this line works
 				}
 				pos[1] += dy;
 			}

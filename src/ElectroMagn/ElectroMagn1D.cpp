@@ -876,10 +876,11 @@ void ElectroMagn1D::initAntennas( Patch *patch, Params& params )
 
 //>>buddhabrot
 
-void ElectroMagn1D::applyMaterialE(Field *myField, Patch *patch){
+void ElectroMagn1D::applyMaterialB(Field *myField, Field *myField_m, Patch *patch){
 	ElectroMagn *fields = patch->EMfields;
 	//static casts
 	Field1D *field = static_cast<Field1D *>( myField );
+	Field1D *field_m = static_cast<Field1D *>( myField );
 
 	// TODO: are all 3 components really defined?
 	
@@ -895,7 +896,7 @@ void ElectroMagn1D::applyMaterialE(Field *myField, Patch *patch){
 	for( unsigned int imat=0; imat < fields->material.size(); imat++){
 		for( int i=0 ; i<N ; i++ ) {
 			if(fields->material[imat]->profile->valueAt( pos) > 0){
-				( *field)( i )  = 0;
+				( *field)( i )  = (*field_m)(i);
 			}
 			pos[0] += dx;
 		}

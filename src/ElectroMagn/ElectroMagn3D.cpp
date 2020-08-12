@@ -1978,10 +1978,11 @@ void ElectroMagn3D::initAntennas( Patch *patch, Params& params )
 }
 
 //>>buddhabrot
-void ElectroMagn3D::applyMaterialE(Field *myField, Patch *patch){
+void ElectroMagn3D::applyMaterialB(Field *myField, Field *myField_m ,Patch *patch){
     ElectroMagn *fields = patch->EMfields;
 	//static casts
 	Field3D *field = static_cast<Field3D *>( myField);
+	Field3D *field_m = static_cast<Field3D *>( myField_m);
 
 	
 	//get starting position
@@ -2008,7 +2009,7 @@ void ElectroMagn3D::applyMaterialE(Field *myField, Patch *patch){
 				pos[2] = pos2;
 				for( int k=0 ; k<N2 ; k++ ) {
 					if(fields->material[imat]->profile->valueAt( pos) > 0){
-						(*field)(i,j,k) = 0;
+						(*field)(i,j,k) = (*field_m)(i ,j , k);
 					}
 					pos[2] += dz;
 				}

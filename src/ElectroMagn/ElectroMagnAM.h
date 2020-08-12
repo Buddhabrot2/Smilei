@@ -232,7 +232,7 @@ public:
     double *invR, *invRd; 
 	
 	//>>buddhabrot
-	void applyMaterialE(Patch * patch);
+	void applyMaterialB(Field *myField, Field *myField_m,  Patch *patch);
 	//<<buddhabrot
 };
 

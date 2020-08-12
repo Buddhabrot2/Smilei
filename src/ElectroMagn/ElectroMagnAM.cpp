@@ -1807,4 +1807,4 @@ void ElectroMagnAM::initAntennas( Patch *patch, Params& params )
 	//<< buddhabrot
 }
 
-void ElectroMagnAM::applyMaterialE(Patch * patch) {}
+void ElectroMagnAM::applyMaterialB(Field *myField, Field *myField_m,  Patch *patch) {}
