@@ -1978,46 +1978,8 @@ void ElectroMagn3D::initAntennas( Patch *patch, Params& params )
 }
 
 //>>buddhabrot
-void ElectroMagn3D::applyMaterialB(Field *myField, Field *myField_m ,Patch *patch){
-    ElectroMagn *fields = patch->EMfields;
-	//static casts
-	Field3D *field = static_cast<Field3D *>( myField);
-	Field3D *field_m = static_cast<Field3D *>( myField_m);
+void ElectroMagn3D::applyMaterial(Patch *patch){
 
-	
-	//get starting position
-	
-	vector<double> pos( 3 );
-	vector<int> idx( 3 );
-	idx[0] = ( ( double )( patch->getCellStartingGlobalIndex( 0 ) )+( field->isDual( 0 )?-0.5:0. ) );
-	idx[1] = ( ( double )( patch->getCellStartingGlobalIndex( 1 ) )+( field->isDual( 0 )?-0.5:0. ) );
-	idx[2] = ( ( double )( patch->getCellStartingGlobalIndex( 2 ) )+( field->isDual( 0 )?-0.5:0. ) );
-    
-	pos[0]      = dx*( ( double )( patch->getCellStartingGlobalIndex( 0 ) )+( field->isDual( 0 )?-0.5:0. ) );
-    double pos1 = dy * idx[1];
-    double pos2 = dz * idx[2];
-	
-    int N0 = ( int )field->dims()[0];
-    int N1 = ( int )field->dims()[1];
-    int N2 = ( int )field->dims()[2];
-
-	//buddhabrot: this is different then in electromagn3D->applyPrescribed, which is isconsisten with 1D and 2D
-	for( unsigned int imat=0; imat < fields->material.size(); imat++){
-		for( int i=0 ; i<N0 ; i++ ) {
-			pos[1] = pos1;
-			for( int j=0 ; j<N1 ; j++ ) {
-				pos[2] = pos2;
-				for( int k=0 ; k<N2 ; k++ ) {
-					if(fields->material[imat]->profile->valueAt( pos) > 0){
-						(*field)(i,j,k) = (*field_m)(i ,j , k);
-					}
-					pos[2] += dz;
-				}
-				pos[1] += dy;
-			}
-			pos[0] += dx;
-		}	
-	}
 }
 //<<buddhabrot
 

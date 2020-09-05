@@ -217,11 +217,30 @@ public:
                 ERROR( "Material #"<<n_material<<": parameter 'profile' not understood" );
             }
 			
-			Material* materialObject=new Material(params.nDim_field);
+			Material* materialObject=new Material(patch, params.nDim_field);
 			
 			materialObject->name = materialName;
             materialObject->profile = new Profile( profile, params.nDim_field, name.str(), true );
-            EMfields->material.push_back( materialObject );
+			
+			//represent the conductivity on the same grids as the fields
+			// the first 6 fields are ex...bz
+			for (unsigned int ifield=0; ifield<6; ifield++){
+			    if (params.nDim_field == 1) {
+                		materialObject->allFields.push_back(new Field1D(EMfields->allFields[ifield]->dims()));
+                	} else if (params.nDim_field == 2){
+                		materialObject->allFields.push_back( new Field2D(EMfields->allFields[ifield]->dims()));
+                	} else if (params.nDim_field == 3){
+                		materialObject->allFields.push_back( new Field3D(EMfields->allFields[ifield]->dims()));
+				}
+				//true copy, since vector elements are not pointers
+				materialObject->allFields.back()->isDual_ = EMfields->allFields[ifield]->isDual_;
+				materialObject->allFields.back()->name = EMfields->allFields[ifield]->name;
+			}			
+						
+			//reads the conductivity on the positions of all fields from the python profile
+			materialObject->initConductivity( EMfields->cell_length);
+
+            EMfields->material =  materialObject ;
         }
 		
 		//>>>>> buddhabrot

@@ -876,30 +876,51 @@ void ElectroMagn1D::initAntennas( Patch *patch, Params& params )
 
 //>>buddhabrot
 
-void ElectroMagn1D::applyMaterialB(Field *myField, Field *myField_m, Patch *patch){
+void ElectroMagn1D::applyMaterial(Patch *patch){
+	//before B update, after E update
 	ElectroMagn *fields = patch->EMfields;
 	//static casts
-	Field1D *field = static_cast<Field1D *>( myField );
-	Field1D *field_m = static_cast<Field1D *>( myField );
 
-	// TODO: are all 3 components really defined?
+	//for each field element, decide if it is free space, inside the metal or on a boundary
+	//do nothing if free space, set to 0 if inside
 	
-	//get starting position
-	vector<double> pos( 1 );
-	vector<int> idx(1);
-	idx[0] = ( ( double )( patch->getCellStartingGlobalIndex( 0 ) )+( field->isDual( 0 )?-0.5:0. ) );
-    pos[0] = dx * idx[0];
-    int N = ( int )field->dims()[0];
+	// free space: in every direction normal to the field direction, the neighbour (of other field kind!) has conductivity 0 or does not exist
+		//do nothing
+		
+	// inside: n every direction normal to the field direction, both neighbours (of other kind) have conductivity > 0 and do exist
+/* 	for (unsigned int ifield=0; ifield< 6; ifield++){
+		Field1D *field1D=static_cast<Field1D *> ( fields->allFields[ifield]);
+		Field1D *matfield1D=static_cast<Field1D *> ( fields->material->allFields[ifield]);
+		
+		int N = ( int )field1D->dims()[0];
     
-	//set E to zero, if the profile indicates so
-    // USING UNSIGNED INT CREATES PB WITH PERIODIC BCs
-	for( unsigned int imat=0; imat < fields->material.size(); imat++){
-		for( int i=0 ; i<N ; i++ ) {
-			if(fields->material[imat]->profile->valueAt( pos) > 0){
-				( *field)( i )  = (*field_m)(i);
+		// USING UNSIGNED INT CREATES PB WITH PERIODIC BCs
+		for( int i=1 ; i<N-1 ; i++ ) {
+			if (matfield1D(i-1) > 0 && matfield1D(i+1) > 0 ){
+				( * field1D)(i) = 0;
 			}
-			pos[0] += dx;
-		}
-	}
+	} */
+	
+		
+
+	// edge: one neighbour has conductivtiy 0, the other has conductivity !=0 (in 2D and 3D, this may be true for two directions independently
+		// if it is a b-field, do nothing
+		// if it is an e field: calculate average absolute value of h-fields, that are between the current cell and the neighbours with conductivity=0. 
+			//multiply by surface impedance factor (in material class) and set E field value to the result. first test: factor is 0 (perfect conductor)
+		
 }
 // <<buddhabrot
+
+
+
+
+
+
+
+
+
+
+
+
+
+

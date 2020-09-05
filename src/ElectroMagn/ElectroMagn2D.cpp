@@ -1515,36 +1515,8 @@ void ElectroMagn2D::initAntennas( Patch *patch, Params& params )
 }
 
 //>>buddhabrot
-void ElectroMagn2D::applyMaterialB(Field *myField, Field *myField_m, Patch *patch){
-    ElectroMagn *fields = patch->EMfields;
+void ElectroMagn2D::applyMaterial(Patch *patch){
 
-	//static casts
-	Field2D *field = static_cast<Field2D *>( myField );
-	Field2D *field_m = static_cast<Field2D *>( myField_m );
-	
-	//get starting position
-	vector<double> pos( 2, 0 );
-	vector<int> idx(2,0);
-	idx[0] = ( ( double )( patch->getCellStartingGlobalIndex( 0 ) )+( field->isDual( 0 )?-0.5:0. ) );
-	idx[1] = ( ( double )( patch->getCellStartingGlobalIndex( 1 ) )+( field->isDual( 0 )?-0.5:0. ) );
-    pos[0]      = dx * idx[0];
-    double pos1 = dy*( ( double )( patch->getCellStartingGlobalIndex( 1 ) )+( field->isDual( 1 )?-0.5:0. ) );
-    int N0 = ( int )field->dims()[0];
-    int N1 = ( int )field->dims()[1];
-	
-	//set E to zero, if the profile indicates so (this belongs in the material class)
-	for( unsigned int imat=0; imat < fields->material.size(); imat++){
-		for( int i=0 ; i<N0 ; i++ ) {
-			pos[1] = pos1;
-			for( int j=0 ; j<N1 ; j++ ) {
-				if(fields->material[imat]->profile->valueAt( pos) > 0){ //this is slow! and the work should be done in the material class
-					( *field )( i, j ) = (*field_m)(i, j); //this line works
-				}
-				pos[1] += dy;
-			}
-			pos[0] += dx;
-		}
-	}
 }
 //<<buddhabrot
 

@@ -1138,24 +1138,6 @@ void VectorPatch::solveMaxwell( Params &params, SimWindow *simWindow, int itime,
             SyncVectorPatch::finalizeexchangeB( params, ( *this ) );
         timers.syncField.update( params.printNow( itime ) );
 
-		//>>>>buddhabrot
-
-    #pragma omp single//for schedule(static)
-	{
-    for( unsigned int ipatch=0 ; ipatch<this->size() ; ipatch++ ) {
-        if( params.geometry != "AMcylindrical"  ) { //buddhabrot: maybe additional requirements are needed (the spectral stuff) -  TODO: still need to understand it
-			( *this )( ipatch )->EMfields->applyMaterialB( ( *this )( ipatch )->EMfields->Bx_, ( *this )( ipatch )->EMfields->Bx_m, ( *this )( ipatch ));
-			( *this )( ipatch )->EMfields->applyMaterialB( ( *this )( ipatch )->EMfields->By_, ( *this )( ipatch )->EMfields->By_m, ( *this )( ipatch ));
-			( *this )( ipatch )->EMfields->applyMaterialB( ( *this )( ipatch )->EMfields->Bz_, ( *this )( ipatch )->EMfields->Bz_m, ( *this )( ipatch ));
-			//does not work. maybe i need to change B , not E, like in the boundary conditions. but why?
-			// in the boundary conditions. B is spatially constant in the ghost zone, not temporally constant
-			// which grid coincides with the cell grid? E or B?
-        }
-    }
-	}
-
-
-//<<<<buddhabrot
 
         #pragma omp for schedule(static)
         for( unsigned int ipatch=0 ; ipatch<this->size() ; ipatch++ ) {
