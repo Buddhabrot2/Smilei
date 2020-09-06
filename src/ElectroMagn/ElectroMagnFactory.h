@@ -226,6 +226,7 @@ public:
 			//not elegant, but should work
 			for (unsigned int ifield=0; ifield<6; ifield++){
 			    if (params.nDim_field == 1) {
+					materialObject->allFields.clear();
 						materialObject->allFields.push_back( new Field1D( EMfields->Ex_->dims(), 0, false, "Ex" ));
 						materialObject->allFields.push_back( new Field1D( EMfields->Ey_->dims(), 1, false, "Ey"));
 						materialObject->allFields.push_back( new Field1D( EMfields->Ez_->dims(), 2, false, "Ez"));
@@ -233,6 +234,7 @@ public:
 						materialObject->allFields.push_back( new Field1D( EMfields->By_->dims(), 1, true,  "By" ));
 						materialObject->allFields.push_back( new Field1D( EMfields->Bz_->dims(), 2, true,  "Bz" ));
                 	} else if (params.nDim_field == 2){
+						materialObject->allFields.clear();
 						materialObject->allFields.push_back( new Field2D( EMfields->Ex_->dims(), 0, false, "Ex" ));
 						materialObject->allFields.push_back( new Field2D( EMfields->Ey_->dims(), 1, false, "Ey"));
 						materialObject->allFields.push_back( new Field2D( EMfields->Ez_->dims(), 2, false, "Ez"));
@@ -240,6 +242,7 @@ public:
 						materialObject->allFields.push_back( new Field2D( EMfields->By_->dims(), 1, true,  "By" ));
 						materialObject->allFields.push_back( new Field2D( EMfields->Bz_->dims(), 2, true,  "Bz" ));
 					} else if (params.nDim_field == 3){
+						materialObject->allFields.clear();
 						materialObject->allFields.push_back( new Field3D( EMfields->Ex_->dims(), 0, false, "Ex" ));
 						materialObject->allFields.push_back( new Field3D( EMfields->Ey_->dims(), 1, false, "Ey"));
 						materialObject->allFields.push_back( new Field3D( EMfields->Ez_->dims(), 2, false, "Ez"));
@@ -251,7 +254,6 @@ public:
 						
 			//reads the conductivity on the positions of all fields from the python profile
 			materialObject->initConductivity( EMfields->cell_length);
-
             EMfields->material =  materialObject ;
         }
 		
@@ -366,8 +368,45 @@ public:
 		//>>buddhabrot
 		//clone material
 		//for(unsigned int imat=0;imat<EMfields->material.size();imat++){
-			newEMfields->material = EMfields->material;
-		//}
+			
+
+			Material* materialObject=new Material(patch, params.nDim_field);
+			
+			materialObject->name = EMfields->material->name;
+            materialObject->profile = EMfields->material->profile;
+			
+			//represent the conductivity on the same grids as the fields
+			//not elegant, but should work
+			for (unsigned int ifield=0; ifield<6; ifield++){
+			    if (params.nDim_field == 1) {
+					materialObject->allFields.clear();
+						materialObject->allFields.push_back( new Field1D( EMfields->Ex_->dims(), 0, false, "Ex" ));
+						materialObject->allFields.push_back( new Field1D( EMfields->Ey_->dims(), 1, false, "Ey"));
+						materialObject->allFields.push_back( new Field1D( EMfields->Ez_->dims(), 2, false, "Ez"));
+						materialObject->allFields.push_back( new Field1D( EMfields->Bx_->dims(), 0, true,  "Bx" ));
+						materialObject->allFields.push_back( new Field1D( EMfields->By_->dims(), 1, true,  "By" ));
+						materialObject->allFields.push_back( new Field1D( EMfields->Bz_->dims(), 2, true,  "Bz" ));
+                	} else if (params.nDim_field == 2){
+						materialObject->allFields.clear();
+						materialObject->allFields.push_back( new Field2D( EMfields->Ex_->dims(), 0, false, "Ex" ));
+						materialObject->allFields.push_back( new Field2D( EMfields->Ey_->dims(), 1, false, "Ey"));
+						materialObject->allFields.push_back( new Field2D( EMfields->Ez_->dims(), 2, false, "Ez"));
+						materialObject->allFields.push_back( new Field2D( EMfields->Bx_->dims(), 0, true,  "Bx" ));
+						materialObject->allFields.push_back( new Field2D( EMfields->By_->dims(), 1, true,  "By" ));
+						materialObject->allFields.push_back( new Field2D( EMfields->Bz_->dims(), 2, true,  "Bz" ));
+					} else if (params.nDim_field == 3){
+						materialObject->allFields.clear();
+						materialObject->allFields.push_back( new Field3D( EMfields->Ex_->dims(), 0, false, "Ex" ));
+						materialObject->allFields.push_back( new Field3D( EMfields->Ey_->dims(), 1, false, "Ey"));
+						materialObject->allFields.push_back( new Field3D( EMfields->Ez_->dims(), 2, false, "Ez"));
+						materialObject->allFields.push_back( new Field3D( EMfields->Bx_->dims(), 0, true,  "Bx" ));
+						materialObject->allFields.push_back( new Field3D( EMfields->By_->dims(), 1, true,  "By" ));
+						materialObject->allFields.push_back( new Field3D( EMfields->Bz_->dims(), 2, true,  "Bz" ));
+				}
+			}		
+			materialObject->initConductivity( EMfields->cell_length);
+			newEMfields->material = materialObject;
+		
 		//<<buddhabrot
         //newEMfields->finishInitialization(vecSpecies.size(), patch);
         

@@ -1516,6 +1516,113 @@ void ElectroMagn2D::initAntennas( Patch *patch, Params& params )
 
 //>>buddhabrot
 void ElectroMagn2D::applyMaterial(Patch *patch){
+	
+	
+		//std::cout<<"Call of apply Material\n"; 
+	
+		ElectroMagn *fields = patch->EMfields;
+		//static casts
+
+		//for each field element, decide if it is free space, inside the metal or on a boundary
+		//do nothing if free space, set to 0 if inside
+		
+		// free space: in every direction normal to the field direction, the neighbour (of other field kind!) has conductivity 0 or does not exist
+			//do nothing
+			
+		// inside: n every direction normal to the field direction, both neighbours (of other kind) have conductivity > 0 and do exist
+		
+		Field2D *Ex = static_cast<Field2D *> (fields->Ex_);
+		Field2D *Ey = static_cast<Field2D *> (fields->Ey_);
+		Field2D *Ez = static_cast<Field2D *> (fields->Ez_);
+		Field2D *Bx = static_cast<Field2D *> (fields->Bx_);
+		Field2D *By = static_cast<Field2D *> (fields->By_);
+		Field2D *Bz = static_cast<Field2D *> (fields->Bz_);
+			
+		Field2D *material_Ex = static_cast<Field2D *> (fields->material->allFields[0]);
+		Field2D *material_Ey = static_cast<Field2D *> (fields->material->allFields[1]);
+		Field2D *material_Ez = static_cast<Field2D *> (fields->material->allFields[2]);
+		Field2D *material_Bx = static_cast<Field2D *> (fields->material->allFields[3]);
+		Field2D *material_By = static_cast<Field2D *> (fields->material->allFields[4]);
+		Field2D *material_Bz = static_cast<Field2D *> (fields->material->allFields[5]);
+		
+		//fields->material->printOutConductivity();
+
+		
+		int N0 = ( int ) Ex ->dims()[0];
+		int N1 = ( int ) Ex ->dims()[1];
+		
+		//std::cout<<N0<< "	"<<N1<<"\n";
+
+		for( int i=0 ; i<N0 ; i++ ) {
+			for( int j=0 ; j<N1 ; j++ ) {
+				if ( (*material_Bz)(i,j) > 0.0 || (*material_Bz)(i,j+1) > 0.0 ){ //since b is dual, it has one extra element
+					( * Ex)(i,j) = 0;
+					//std::cout << "Apply Material: Ex = 0 at    "<<i<<"    "<<j<<"\n";
+				}
+				//std::cout << "Apply Material: "<<  fields->material->allFields[0]->name <<" = "<< (*fields->material->allFields[0])(i,j)  <<" at    "<< i <<"    "<< j <<"\n";
+			}
+		}
+		
+		N0 = ( int ) Ey ->dims()[0];
+		N1 = ( int ) Ey ->dims()[1];
+
+		for( int i=0 ; i<N0 ; i++ ) {
+			for( int j=0 ; j<N1 ; j++ ) {
+				if ( (*material_Bz)(i,j) > 0.0 || (*material_Bz)(i+1,j)> 0.0 ){ //since b is dual, it has one extra element
+					( * Ey)(i,j) = 0;
+					//std::cout << "Apply Material: Ey = 0 at    "<<i<<"    "<<j<<"\n";
+
+				}
+			}
+		}
+		
+		N0 = ( int ) Ez ->dims()[0];
+		N1 = ( int ) Ez ->dims()[1];
+
+		for( int i=0 ; i<N0 ; i++ ) {
+			for( int j=0 ; j<N1 ; j++ ) {
+				if ( (*material_Bx)(i,j) > 0 || (*material_Bx)(i,j+1)> 0 || (*material_By)(i,j) > 0 || (*material_By)(i+1,j)> 0 ){ //since b is dual, it has one extra element
+					( * Ez)(i,j) = 0;
+					//std::cout << "Apply Material: Ez = 0 at    "<<i<<"    "<<j<<"\n";
+				}
+			}
+		}
+		
+		N0 = ( int ) Bx ->dims()[0];
+		N1 = ( int ) Bx ->dims()[1];
+		for( int i=1 ; i<N0-1 ; i++ ) {
+			for( int j=1 ; j<N1-1 ; j++ ) {
+				//for B, it has to be AND!
+				if ( (*material_Ez)(i,j-1) > 0 && (*material_Ez)(i,j)> 0 ){ //since b is dual, it has one extra element
+					( * Bz)(i,j) = 0;
+					//std::cout << "Apply Material: Bx = 0 at    "<<i<<"    "<<j<<"\n";
+				}
+			}
+		}
+		
+		N0 = ( int ) By ->dims()[0];
+		N1 = ( int ) By ->dims()[1];
+		for( int i=1 ; i<N0-1 ; i++ ) {
+			for( int j=1 ; j<N1-1 ; j++ ) {
+				//for B, it has to be AND!
+				if ( (*material_Ez)(i-1,j) > 0 && (*material_Ez)(i,j)> 0 ){ //since b is dual, it has one extra element
+					( * Bz)(i,j) = 0;
+					//std::cout << "Apply Material: By = 0 at    "<<i<<"    "<<j<<"\n";
+				}
+			}
+		}
+		
+		N0 = ( int ) Bz ->dims()[0];
+		N1 = ( int ) Bz ->dims()[1];
+		for( int i=1 ; i<N0-1 ; i++ ) {
+			for( int j=1 ; j<N1-1 ; j++ ) {
+				//for B, it has to be AND!
+				if ( ((*material_Ey)(i-1,j) > 0 && (*material_Ey)(i,j)> 0) || ((*material_Ex)(i,j-1) > 0 && (*material_Ex)(i,j)> 0 )){ //since b is dual, it has one extra element
+					( * Bz)(i,j) = 0;
+					//std::cout << "Apply Material: Bz = 0 at    "<<i<<"    "<<j<<"\n";
+				}
+			}
+		}
 
 }
 //<<buddhabrot

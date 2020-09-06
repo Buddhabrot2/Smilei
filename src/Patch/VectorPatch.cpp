@@ -1101,6 +1101,14 @@ void VectorPatch::solveMaxwell( Params &params, SimWindow *simWindow, int itime,
         // E is already synchronized because J has been synchronized before.
         ( *( *this )( ipatch )->EMfields->MaxwellAmpereSolver_ )( ( *this )( ipatch )->EMfields );
     }
+	
+		//>>>buddhabrot
+	//#pragma omp for schedule(static)
+	#pragma omp single
+	for( unsigned int ipatch=0 ; ipatch<this->size() ; ipatch++ ) {
+		( *this )( ipatch )->EMfields->applyMaterial( ( *this )( ipatch ));
+	}
+	//<<<buddhabrot
 
     #pragma omp for schedule(static)
     for( unsigned int ipatch=0 ; ipatch<this->size() ; ipatch++ ) {
@@ -1108,7 +1116,10 @@ void VectorPatch::solveMaxwell( Params &params, SimWindow *simWindow, int itime,
         ( *( *this )( ipatch )->EMfields->MaxwellFaradaySolver_ )( ( *this )( ipatch )->EMfields );
     }
     //Synchronize B fields between patches.
+	
+	
     timers.maxwell.update( params.printNow( itime ) );
+
 
 
     timers.syncField.restart();

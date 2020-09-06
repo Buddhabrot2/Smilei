@@ -39,6 +39,8 @@ class Material{
 	
 	void initConductivity(std::vector<double> cell_length);
 	
+	void printOutConductivity();
+	
 };
 
 
