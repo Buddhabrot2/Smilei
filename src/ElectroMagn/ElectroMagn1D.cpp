@@ -888,18 +888,31 @@ void ElectroMagn1D::applyMaterial(Patch *patch){
 		//do nothing
 		
 	// inside: n every direction normal to the field direction, both neighbours (of other kind) have conductivity > 0 and do exist
-/* 	for (unsigned int ifield=0; ifield< 6; ifield++){
-		Field1D *field1D=static_cast<Field1D *> ( fields->allFields[ifield]);
-		Field1D *matfield1D=static_cast<Field1D *> ( fields->material->allFields[ifield]);
-		
-		int N = ( int )field1D->dims()[0];
-    
+	
+	Field1D* Ex = static_cast<Field1D *> fields->Ex_;
+	Field1D* Ey = static_cast<Field1D *> fields->Ey_;
+	Field1D* Ez = static_cast<Field1D *> fields->Ez_;
+	Field1D* Bx = static_cast<Field1D *> fields->Bx_;
+	Field1D* By = static_cast<Field1D *> fields->By_;
+	Field1D* Bz = static_cast<Field1D *> fields->Bz_;
+
+	Field1D* material_Ex = static_cast<Field1D *> fields->material->allFields[0];
+	Field1D* material_Ey = static_cast<Field1D *> fields->material->allFields[1];
+	Field1D* material_Ez = static_cast<Field1D *> fields->material->allFields[2]
+	Field1D* material_Bx = static_cast<Field1D *> fields->material->allFields[3];
+	Field1D* material_By = static_cast<Field1D *> fields->material->allFields[4];
+	Field1D* material_Bz = static_cast<Field1D *> fields->material->allFields[5];
+	
+	
+	int N = ( int ) Ex ->dims()[0];
 		// USING UNSIGNED INT CREATES PB WITH PERIODIC BCs
-		for( int i=1 ; i<N-1 ; i++ ) {
-			if (matfield1D(i-1) > 0 && matfield1D(i+1) > 0 ){
-				( * field1D)(i) = 0;
+		for( int i=0 ; i<N ; i++ ) {
+			//For Ex
+			if (material_Bz(i) > 0 && material_Bz(i)(i+1) > 0 ){
+				( * Ex)(i) = 0;
 			}
-	} */
+		}
+	
 	
 		
 
